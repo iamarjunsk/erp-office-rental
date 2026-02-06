@@ -1,124 +1,197 @@
 <template>
   <div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
       <div>
         <h1 class="text-3xl font-bold">Users</h1>
         <p class="text-muted-foreground">Manage system users and permissions</p>
       </div>
-      <button class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+      <button @click="showAddModal = true"
+        class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
         <Icon name="lucide:plus" class="w-4 h-4" />
         Add User
       </button>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid gap-4 md:grid-cols-4">
-      <div class="bg-card border border-border rounded-lg p-4">
-        <p class="text-sm text-muted-foreground">Total Users</p>
-        <p class="text-2xl font-bold">45</p>
+    <!-- Stats Cards -->
+    <div class="grid md:grid-cols-4 gap-4">
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-blue-500/10 rounded-lg">
+            <Icon name="lucide:users" class="w-6 h-6 text-blue-500" />
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ users.length }}</p>
+            <p class="text-sm text-muted-foreground">Total Users</p>
+          </div>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-lg p-4">
-        <p class="text-sm text-muted-foreground">Active Users</p>
-        <p class="text-2xl font-bold">42</p>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-green-500/10 rounded-lg">
+            <Icon name="lucide:user-check" class="w-6 h-6 text-green-500" />
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ activeCount }}</p>
+            <p class="text-sm text-muted-foreground">Active</p>
+          </div>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-lg p-4">
-        <p class="text-sm text-muted-foreground">Admin Users</p>
-        <p class="text-2xl font-bold">8</p>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-purple-500/10 rounded-lg">
+            <Icon name="lucide:shield" class="w-6 h-6 text-purple-500" />
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ adminCount }}</p>
+            <p class="text-sm text-muted-foreground">Admins</p>
+          </div>
+        </div>
       </div>
-      <div class="bg-card border border-border rounded-lg p-4">
-        <p class="text-sm text-muted-foreground">Tenant Users</p>
-        <p class="text-2xl font-bold">34</p>
+      <div class="bg-card border border-border rounded-xl p-6">
+        <div class="flex items-center gap-3">
+          <div class="p-3 bg-amber-500/10 rounded-lg">
+            <Icon name="lucide:briefcase" class="w-6 h-6 text-amber-500" />
+          </div>
+          <div>
+            <p class="text-2xl font-bold">{{ managerCount }}</p>
+            <p class="text-sm text-muted-foreground">Managers</p>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="flex flex-col sm:flex-row gap-4">
-      <div class="relative flex-1">
+    <!-- Filters -->
+    <div class="flex gap-4">
+      <div class="relative flex-1 max-w-sm">
         <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search users..."
-          class="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-        />
+        <input v-model="searchQuery" type="text" placeholder="Search users..."
+          class="w-full pl-10 pr-4 py-2 bg-background border border-border rounded-lg" />
       </div>
-      <select v-model="roleFilter" class="px-4 py-2 bg-card border border-border rounded-lg">
+      <select v-model="roleFilter" class="px-4 py-2 bg-background border border-border rounded-lg">
         <option value="">All Roles</option>
         <option value="super_admin">Super Admin</option>
         <option value="admin">Admin</option>
-        <option value="property_manager">Property Manager</option>
-        <option value="leasing_manager">Leasing Manager</option>
-        <option value="finance_manager">Finance Manager</option>
-        <option value="tenant_admin">Tenant Admin</option>
-        <option value="tenant_member">Tenant Member</option>
-      </select>
-      <select v-model="statusFilter" class="px-4 py-2 bg-card border border-border rounded-lg">
-        <option value="">All Status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-        <option value="suspended">Suspended</option>
+        <option value="manager">Manager</option>
+        <option value="staff">Staff</option>
       </select>
     </div>
 
-    <div class="bg-card border border-border rounded-lg overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full">
-          <thead class="bg-muted">
-            <tr>
-              <th class="px-4 py-3 text-left text-sm font-medium">User</th>
-              <th class="px-4 py-3 text-left text-sm font-medium">Email</th>
-              <th class="px-4 py-3 text-left text-sm font-medium">Role</th>
-              <th class="px-4 py-3 text-left text-sm font-medium">Status</th>
-              <th class="px-4 py-3 text-left text-sm font-medium">Last Login</th>
-              <th class="px-4 py-3 text-left text-sm font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border">
-            <tr v-for="user in users" :key="user.id" class="hover:bg-muted/50">
-              <td class="px-4 py-3 text-sm">
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                    <Icon name="lucide:user" class="w-4 h-4 text-primary" />
-                  </div>
-                  <span class="font-medium">{{ user.firstName }} {{ user.lastName }}</span>
+    <!-- Users Table -->
+    <div class="bg-card border border-border rounded-xl overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-muted/50 border-b border-border">
+          <tr>
+            <th class="px-6 py-4 text-left text-sm font-medium">User</th>
+            <th class="px-6 py-4 text-left text-sm font-medium">Role</th>
+            <th class="px-6 py-4 text-left text-sm font-medium">Department</th>
+            <th class="px-6 py-4 text-left text-sm font-medium">Status</th>
+            <th class="px-6 py-4 text-left text-sm font-medium">Joined</th>
+            <th class="px-6 py-4 text-right text-sm font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          <tr v-for="user in filteredUsers" :key="user.id" class="hover:bg-muted/50">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <span class="text-sm font-medium text-primary">
+                    {{ user.first_name?.charAt(0) }}{{ user.last_name?.charAt(0) }}
+                  </span>
                 </div>
-              </td>
-              <td class="px-4 py-3 text-sm">{{ user.email }}</td>
-              <td class="px-4 py-3 text-sm">
-                <span class="px-2 py-1 bg-muted rounded text-xs capitalize">
-                  {{ user.role.replace('_', ' ') }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm">
-                <span 
-                  class="px-2 py-1 rounded-full text-xs font-medium"
-                  :class="{
-                    'bg-green-100 text-green-700': user.status === 'active',
-                    'bg-red-100 text-red-700': user.status === 'inactive',
-                    'bg-amber-100 text-amber-700': user.status === 'suspended',
-                  }"
-                >
-                  {{ user.status }}
-                </span>
-              </td>
-              <td class="px-4 py-3 text-sm">{{ user.lastLoginAt || 'Never' }}</td>
-              <td class="px-4 py-3 text-sm">
-                <div class="flex items-center gap-2">
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
-                    <Icon name="lucide:eye" class="w-4 h-4" />
-                  </button>
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
-                    <Icon name="lucide:pencil" class="w-4 h-4" />
-                  </button>
+                <div>
+                  <p class="font-medium">{{ user.full_name }}</p>
+                  <p class="text-sm text-muted-foreground">{{ user.email }}</p>
                 </div>
-              </td>
-            </tr>
-            <tr v-if="users.length === 0">
-              <td colspan="6" class="px-4 py-8 text-center text-muted-foreground">
-                No users found
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span :class="getRoleClass(user.role)" class="px-2 py-1 text-xs rounded-full">
+                {{ formatRole(user.role) }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-muted-foreground">
+              {{ user.department || '-' }}
+            </td>
+            <td class="px-6 py-4">
+              <span :class="user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+                class="px-2 py-1 text-xs rounded-full">
+                {{ user.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-muted-foreground">
+              {{ formatDate(user.created_at) }}
+            </td>
+            <td class="px-6 py-4 text-right">
+              <NuxtLink :to="`/admin/users/${user.id}`" class="p-2 hover:bg-muted rounded-lg inline-block">
+                <Icon name="lucide:eye" class="w-4 h-4" />
+              </NuxtLink>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div v-if="filteredUsers.length === 0" class="p-12 text-center">
+        <Icon name="lucide:users" class="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <h3 class="text-lg font-medium mb-2">No users found</h3>
+        <p class="text-muted-foreground">Try adjusting your search or filters</p>
+      </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      @click.self="showAddModal = false">
+      <div class="bg-card rounded-xl w-full max-w-lg m-4">
+        <div class="p-6 border-b border-border flex items-center justify-between">
+          <h3 class="text-lg font-semibold">Add New User</h3>
+          <button @click="showAddModal = false" class="p-2 hover:bg-muted rounded-full">
+            <Icon name="lucide:x" class="w-5 h-5" />
+          </button>
+        </div>
+        <form @submit.prevent="addUser" class="p-6 space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium">First Name *</label>
+              <input v-model="newUser.first_name" type="text" required
+                class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+            </div>
+            <div>
+              <label class="text-sm font-medium">Last Name *</label>
+              <input v-model="newUser.last_name" type="text" required
+                class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+            </div>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Email *</label>
+            <input v-model="newUser.email" type="email" required
+              class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Role *</label>
+            <select v-model="newUser.role" required
+              class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
+              <option value="staff">Staff</option>
+              <option value="manager">Manager</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-sm font-medium">Department</label>
+            <input v-model="newUser.department" type="text"
+              class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+          </div>
+          <div>
+            <label class="text-sm font-medium">Password *</label>
+            <input v-model="newUser.password" type="password" required
+              class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+          </div>
+          <div class="flex justify-end gap-3 pt-4">
+            <button type="button" @click="showAddModal = false"
+              class="px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
+            <button type="submit"
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">Add User</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -130,15 +203,57 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+// Mock users data (will connect to Django API)
 const users = ref([
-  { id: 1, firstName: 'Super', lastName: 'Admin', email: 'admin@officeerp.com', role: 'super_admin', status: 'active', lastLoginAt: '2026-02-05 10:30 AM' },
-  { id: 2, firstName: 'Property', lastName: 'Manager', email: 'manager@officeerp.com', role: 'property_manager', status: 'active', lastLoginAt: '2026-02-05 09:15 AM' },
-  { id: 3, firstName: 'John', lastName: 'Doe', email: 'john@techsolutions.com', role: 'tenant_admin', status: 'active', lastLoginAt: '2026-02-04 04:20 PM' },
-  { id: 4, firstName: 'Jane', lastName: 'Smith', email: 'jane@innovatelabs.com', role: 'tenant_member', status: 'active', lastLoginAt: '2026-02-03 11:45 AM' },
-  { id: 5, firstName: 'Finance', lastName: 'Manager', email: 'finance@officeerp.com', role: 'finance_manager', status: 'active', lastLoginAt: '2026-02-05 08:00 AM' },
+  { id: 1, email: 'admin@officeerp.com', first_name: 'Admin', last_name: 'User', full_name: 'Admin User', role: 'super_admin', department: 'IT', is_active: true, created_at: '2024-01-15' },
+  { id: 2, email: 'jane.smith@officeerp.com', first_name: 'Jane', last_name: 'Smith', full_name: 'Jane Smith', role: 'admin', department: 'Operations', is_active: true, created_at: '2024-02-01' },
+  { id: 3, email: 'mike.johnson@officeerp.com', first_name: 'Mike', last_name: 'Johnson', full_name: 'Mike Johnson', role: 'manager', department: 'Finance', is_active: true, created_at: '2024-03-10' },
+  { id: 4, email: 'sarah.williams@officeerp.com', first_name: 'Sarah', last_name: 'Williams', full_name: 'Sarah Williams', role: 'staff', department: 'HR', is_active: true, created_at: '2024-04-05' },
+  { id: 5, email: 'david.brown@officeerp.com', first_name: 'David', last_name: 'Brown', full_name: 'David Brown', role: 'staff', department: 'Sales', is_active: false, created_at: '2024-05-20' },
 ])
 
 const searchQuery = ref('')
 const roleFilter = ref('')
-const statusFilter = ref('')
+const showAddModal = ref(false)
+
+const newUser = ref({
+  first_name: '',
+  last_name: '',
+  email: '',
+  role: 'staff',
+  department: '',
+  password: '',
+})
+
+const filteredUsers = computed(() => {
+  return users.value.filter(user => {
+    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
+    const matchesRole = !roleFilter.value || user.role === roleFilter.value
+    return matchesSearch && matchesRole
+  })
+})
+
+const activeCount = computed(() => users.value.filter(u => u.is_active).length)
+const adminCount = computed(() => users.value.filter(u => ['super_admin', 'admin'].includes(u.role)).length)
+const managerCount = computed(() => users.value.filter(u => u.role === 'manager').length)
+
+const getRoleClass = (role: string) => {
+  const classes: Record<string, string> = {
+    super_admin: 'bg-purple-100 text-purple-700',
+    admin: 'bg-blue-100 text-blue-700',
+    manager: 'bg-amber-100 text-amber-700',
+    staff: 'bg-gray-100 text-gray-700',
+  }
+  return classes[role] || 'bg-gray-100 text-gray-700'
+}
+
+const formatRole = (role: string) => role?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'
+
+const addUser = () => {
+  console.log('Adding user:', newUser.value)
+  alert('User added! (Mock)')
+  showAddModal.value = false
+}
 </script>
