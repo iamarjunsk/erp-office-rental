@@ -198,23 +198,27 @@
 </template>
 
 <script setup lang="ts">
+const API_BASE = 'http://localhost:8000/api/users'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-// Mock users data (will connect to Django API)
-const users = ref([
-  { id: 1, email: 'admin@officeerp.com', first_name: 'Admin', last_name: 'User', full_name: 'Admin User', role: 'super_admin', department: 'IT', is_active: true, created_at: '2024-01-15' },
-  { id: 2, email: 'jane.smith@officeerp.com', first_name: 'Jane', last_name: 'Smith', full_name: 'Jane Smith', role: 'admin', department: 'Operations', is_active: true, created_at: '2024-02-01' },
-  { id: 3, email: 'mike.johnson@officeerp.com', first_name: 'Mike', last_name: 'Johnson', full_name: 'Mike Johnson', role: 'manager', department: 'Finance', is_active: true, created_at: '2024-03-10' },
-  { id: 4, email: 'sarah.williams@officeerp.com', first_name: 'Sarah', last_name: 'Williams', full_name: 'Sarah Williams', role: 'staff', department: 'HR', is_active: true, created_at: '2024-04-05' },
-  { id: 5, email: 'david.brown@officeerp.com', first_name: 'David', last_name: 'Brown', full_name: 'David Brown', role: 'staff', department: 'Sales', is_active: false, created_at: '2024-05-20' },
-])
+const { getAccessToken, authHeaders } = useAuth()
+
+// Fetch users from Django API
+const { data: usersData, pending: loading, refresh } = await useFetch<any[]>(`${API_BASE}/`, {
+  headers: authHeaders(),
+  default: () => [],
+})
+
+const users = computed(() => usersData.value || [])
 
 const searchQuery = ref('')
 const roleFilter = ref('')
 const showAddModal = ref(false)
+const isSubmitting = ref(false)
 
 const newUser = ref({
   first_name: '',
@@ -223,20 +227,22 @@ const newUser = ref({
   role: 'staff',
   department: '',
   password: '',
+  password_confirm: '',
 })
 
 const filteredUsers = computed(() => {
-  return users.value.filter(user => {
-    const matchesSearch = user.full_name.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+  return users.value.filter((user: any) => {
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase()
+    const matchesSearch = fullName.includes(searchQuery.value.toLowerCase()) ||
       user.email.toLowerCase().includes(searchQuery.value.toLowerCase())
     const matchesRole = !roleFilter.value || user.role === roleFilter.value
     return matchesSearch && matchesRole
   })
 })
 
-const activeCount = computed(() => users.value.filter(u => u.is_active).length)
-const adminCount = computed(() => users.value.filter(u => ['super_admin', 'admin'].includes(u.role)).length)
-const managerCount = computed(() => users.value.filter(u => u.role === 'manager').length)
+const activeCount = computed(() => users.value.filter((u: any) => u.is_active).length)
+const adminCount = computed(() => users.value.filter((u: any) => ['super_admin', 'admin'].includes(u.role)).length)
+const managerCount = computed(() => users.value.filter((u: any) => u.role === 'manager').length)
 
 const getRoleClass = (role: string) => {
   const classes: Record<string, string> = {
@@ -251,9 +257,21 @@ const getRoleClass = (role: string) => {
 const formatRole = (role: string) => role?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
 const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'
 
-const addUser = () => {
-  console.log('Adding user:', newUser.value)
-  alert('User added! (Mock)')
-  showAddModal.value = false
+const addUser = async () => {
+  isSubmitting.value = true
+  try {
+    newUser.value.password_confirm = newUser.value.password
+    await $fetch(`${API_BASE}/register/`, {
+      method: 'POST',
+      body: newUser.value,
+    })
+    showAddModal.value = false
+    newUser.value = { first_name: '', last_name: '', email: '', role: 'staff', department: '', password: '', password_confirm: '' }
+    await refresh()
+  } catch (e: any) {
+    alert(e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 </script>

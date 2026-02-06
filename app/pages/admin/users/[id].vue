@@ -203,30 +203,50 @@
 </template>
 
 <script setup lang="ts">
+const API_BASE = 'http://localhost:8000/api/users'
+
 definePageMeta({
     layout: 'admin',
     middleware: ['auth'],
 })
 
 const route = useRoute()
+const { authHeaders } = useAuth()
 
-// Mock user data
-const user = ref({
-    id: route.params.id,
-    email: 'admin@officeerp.com',
-    first_name: 'Admin',
-    last_name: 'User',
-    full_name: 'Admin User',
-    phone: '+91 98765 43210',
-    department: 'IT',
-    role: 'super_admin',
-    is_active: true,
-    created_at: '2024-01-15',
-    updated_at: '2024-06-01',
+// Fetch user from Django API
+const { data: userData, pending: loading, refresh } = await useFetch<any>(`${API_BASE}/${route.params.id}/`, {
+    headers: authHeaders(),
+})
+
+const user = computed(() => {
+    const u = userData.value
+    if (!u) return null
+    return {
+        ...u,
+        full_name: `${u.first_name} ${u.last_name}`,
+    }
 })
 
 const showEditModal = ref(false)
-const editForm = ref({ ...user.value })
+const editForm = ref({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    department: '',
+})
+const isSubmitting = ref(false)
+
+// Sync edit form when user loads
+watchEffect(() => {
+    if (user.value) {
+        editForm.value = {
+            first_name: user.value.first_name,
+            last_name: user.value.last_name,
+            phone: user.value.phone || '',
+            department: user.value.department || '',
+        }
+    }
+})
 
 const getRoleClass = (role: string | undefined) => {
     const classes: Record<string, string> = {
@@ -241,19 +261,46 @@ const getRoleClass = (role: string | undefined) => {
 const formatRole = (role: string | undefined) => role?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ') || ''
 const formatDate = (date: string | undefined) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'
 
-const saveUser = () => {
-    Object.assign(user.value, editForm.value)
-    showEditModal.value = false
-    alert('User updated! (Mock)')
+const saveUser = async () => {
+    isSubmitting.value = true
+    try {
+        await $fetch(`${API_BASE}/${route.params.id}/`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: editForm.value,
+        })
+        showEditModal.value = false
+        await refresh()
+    } catch (e: any) {
+        alert(e.data?.detail || 'Failed to update user')
+    } finally {
+        isSubmitting.value = false
+    }
 }
 
-const deactivateUser = () => {
-    user.value.is_active = false
-    alert('User deactivated! (Mock)')
+const deactivateUser = async () => {
+    try {
+        await $fetch(`${API_BASE}/${route.params.id}/`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: { is_active: false },
+        })
+        await refresh()
+    } catch (e: any) {
+        alert(e.data?.detail || 'Failed to deactivate user')
+    }
 }
 
-const activateUser = () => {
-    user.value.is_active = true
-    alert('User activated! (Mock)')
+const activateUser = async () => {
+    try {
+        await $fetch(`${API_BASE}/${route.params.id}/`, {
+            method: 'PATCH',
+            headers: authHeaders(),
+            body: { is_active: true },
+        })
+        await refresh()
+    } catch (e: any) {
+        alert(e.data?.detail || 'Failed to activate user')
+    }
 }
 </script>

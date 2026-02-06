@@ -33,10 +33,12 @@
             <Icon name="lucide:user" class="w-5 h-5 text-slate-600" />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-slate-900 truncate">Super Admin</p>
-            <p class="text-xs text-slate-500 truncate group-hover:text-slate-700">admin@officeerp.com</p>
+            <p class="text-sm font-semibold text-slate-900 truncate">{{ user?.first_name || 'User' }} {{ user?.last_name || '' }}</p>
+            <p class="text-xs text-slate-500 truncate group-hover:text-slate-700">{{ user?.email || 'Not logged in' }}</p>
           </div>
-          <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
+          <button @click="logout" title="Logout" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+            <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
+          </button>
         </div>
       </div>
     </aside>
@@ -60,6 +62,7 @@
 </template>
 
 <script setup lang="ts">
+const { user, logout } = useAuth()
 const route = useRoute()
 
 const isActive = (href: string) => {

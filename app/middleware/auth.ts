@@ -1,4 +1,10 @@
 export default defineNuxtRouteMiddleware((to, from) => {
-    // TODO: Implement actual authentication logic
-    console.log("Auth middleware executed for:", to.path);
+    const { isAuthenticated } = useAuth();
+
+    // Skip on server side to avoid hydration mismatch with localStorage
+    if (process.server) return;
+
+    if (!isAuthenticated.value) {
+        return navigateTo("/login");
+    }
 });

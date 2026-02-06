@@ -125,6 +125,5 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     
     def get_serializer_class(self):
-        if self.request.method in ['PUT', 'PATCH']:
-            return UserUpdateSerializer
+        # Admin can update all fields using UserSerializer
         return UserSerializer
