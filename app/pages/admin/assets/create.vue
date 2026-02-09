@@ -5,120 +5,52 @@
         <Icon name="lucide:arrow-left" class="w-5 h-5" />
       </NuxtLink>
       <div>
-        <h1 class="text-3xl font-bold">Add New Asset</h1>
-        <p class="text-muted-foreground">Register a new asset in the system</p>
+        <h1 class="text-3xl font-bold">Add Asset</h1>
+        <p class="text-muted-foreground">Register a new facility asset</p>
       </div>
     </div>
 
-    <form @submit.prevent="submitAsset" class="space-y-8">
-      <!-- Basic Info -->
-      <div class="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Basic Information</h2>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="space-y-2">
+    <form @submit.prevent="createAsset" class="max-w-4xl space-y-8">
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Basic Information</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2 md:col-span-2">
             <label class="text-sm font-medium">Asset Name *</label>
-            <input 
+            <input
               v-model="form.name"
               type="text"
-              placeholder="e.g., MacBook Pro 14\""
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="e.g., Dell Laptop Latitude 5520"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
+            />
+          </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-medium">Description</label>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              placeholder="Detailed description of the asset..."
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium">Category *</label>
-            <select 
-              v-model="form.categoryId"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            <select
+              v-model="form.category"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
-              <option value="">Select category</option>
-              <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+              <option value="">Select Category</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                {{ cat.name }}
+              </option>
             </select>
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Subcategory</label>
-            <input 
-              v-model="form.subcategory"
-              type="text"
-              placeholder="e.g., Laptop"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Make/Brand *</label>
-            <input 
-              v-model="form.make"
-              type="text"
-              placeholder="e.g., Apple"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Model *</label>
-            <input 
-              v-model="form.model"
-              type="text"
-              placeholder="e.g., MacBook Pro 14"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Serial Number *</label>
-            <input 
-              v-model="form.serialNumber"
-              type="text"
-              placeholder="Enter serial number"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
-          </div>
-        </div>
-        <div class="space-y-2">
-          <label class="text-sm font-medium">Description</label>
-          <textarea 
-            v-model="form.description"
-            rows="3"
-            placeholder="Detailed description of the asset..."
-            class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-          ></textarea>
-        </div>
-      </div>
-
-      <!-- Location & Assignment -->
-      <div class="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Location & Assignment</h2>
-        <div class="grid md:grid-cols-3 gap-4">
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Property *</label>
-            <select 
-              v-model="form.propertyId"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            >
-              <option value="">Select property</option>
-              <option v-for="prop in properties" :key="prop.id" :value="prop.id">{{ prop.name }}</option>
-            </select>
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Location *</label>
-            <input 
-              v-model="form.location"
-              type="text"
-              placeholder="e.g., Floor 3, Desk 42"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            />
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium">Condition *</label>
-            <select 
+            <select
               v-model="form.condition"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
               <option value="excellent">Excellent</option>
@@ -128,105 +60,180 @@
             </select>
           </div>
         </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Location</h2>
         <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Initial Status</label>
-            <select 
-              v-model="form.status"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            <label class="text-sm font-medium">Property *</label>
+            <select
+              v-model="form.property"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
             >
-              <option value="available">Available</option>
-              <option value="in_use">In Use</option>
+              <option value="">Select Property</option>
+              <option v-for="prop in properties" :key="prop.id" :value="prop.id">
+                {{ prop.name }}
+              </option>
             </select>
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium">Assign To (Optional)</label>
-            <select 
-              v-model="form.assignedToId"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            <label class="text-sm font-medium">Space (Optional)</label>
+            <select
+              v-model="form.space"
+              :disabled="!form.property"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50"
             >
-              <option value="">Unassigned</option>
-              <option value="1">John Doe - Facility</option>
-              <option value="2">Jane Smith - Engineering</option>
-              <option value="3">Mike Wilson - Admin</option>
+              <option value="">{{ form.property ? 'Select Space' : 'Select property first' }}</option>
+              <option v-for="space in filteredSpaces" :key="space.id" :value="space.id">
+                {{ space.code }} - {{ space.name }}
+              </option>
             </select>
           </div>
         </div>
       </div>
 
-      <!-- Financial Info -->
-      <div class="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Financial Information</h2>
-        <div class="grid md:grid-cols-4 gap-4">
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Specifications</h2>
+        <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Purchase Price (₹) *</label>
-            <input 
-              v-model.number="form.purchasePrice"
-              type="number"
-              min="0"
-              placeholder="e.g., 145000"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+            <label class="text-sm font-medium">Manufacturer</label>
+            <input
+              v-model="form.manufacturer"
+              type="text"
+              placeholder="e.g., Dell"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium">Purchase Date *</label>
-            <input 
-              v-model="form.purchaseDate"
+            <label class="text-sm font-medium">Model Number</label>
+            <input
+              v-model="form.model_number"
+              type="text"
+              placeholder="e.g., Latitude 5520"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Serial Number</label>
+            <input
+              v-model="form.serial_number"
+              type="text"
+              placeholder="Asset serial number"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-medium">Specifications</label>
+            <textarea
+              v-model="form.specifications"
+              rows="3"
+              placeholder="Technical specifications..."
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Purchase Information</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Purchase Date</label>
+            <input
+              v-model="form.purchase_date"
               type="date"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Purchase Price (Rs.)</label>
+            <input
+              v-model.number="form.purchase_price"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Vendor</label>
+            <input
+              v-model="form.vendor"
+              type="text"
+              placeholder="Vendor name"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div class="space-y-2">
             <label class="text-sm font-medium">Warranty Expiry</label>
-            <input 
-              v-model="form.warrantyExpiry"
+            <input
+              v-model="form.warranty_expiry"
               type="date"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
           <div class="space-y-2">
-            <label class="text-sm font-medium">Useful Life (Years) *</label>
-            <input 
-              v-model.number="form.usefulLife"
+            <label class="text-sm font-medium">Useful Life (Years)</label>
+            <input
+              v-model.number="form.useful_life_years"
               type="number"
-              min="1"
-              max="50"
-              placeholder="e.g., 5"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
+              min="0"
+              placeholder="5"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
-        </div>
-        <div class="grid md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Depreciation Method *</label>
-            <select 
-              v-model="form.depreciationMethod"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              required
-            >
-              <option value="straight_line">Straight Line</option>
-              <option value="declining_balance">Declining Balance</option>
-              <option value="none">No Depreciation</option>
-            </select>
-          </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium">Vendor</label>
-            <select 
-              v-model="form.vendorId"
-              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="">Select vendor (optional)</option>
-              <option v-for="vendor in vendors" :key="vendor.id" :value="vendor.id">{{ vendor.name }}</option>
-            </select>
+            <label class="text-sm font-medium">Depreciation Rate (%)</label>
+            <input
+              v-model.number="form.depreciation_rate"
+              type="number"
+              step="0.01"
+              min="0"
+              max="100"
+              placeholder="20"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
           </div>
         </div>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-4">
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Additional Information</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Photo URL</label>
+            <input
+              v-model="form.photo_url"
+              type="url"
+              placeholder="https://..."
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Document URL</label>
+            <input
+              v-model="form.document_url"
+              type="url"
+              placeholder="https://..."
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-medium">Notes</label>
+            <textarea
+              v-model="form.notes"
+              rows="3"
+              placeholder="Additional notes..."
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 pt-4">
         <button 
           type="button"
           @click="$router.back()"
@@ -236,10 +243,10 @@
         </button>
         <button 
           type="submit"
-          class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
-          :disabled="saving"
+          :disabled="creating"
+          class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
         >
-          {{ saving ? 'Saving...' : 'Add Asset' }}
+          {{ creating ? 'Creating...' : 'Create Asset' }}
         </button>
       </div>
     </form>
@@ -252,45 +259,76 @@ definePageMeta({
   middleware: ['auth'],
 })
 
-const { data: categoryData } = await useFetch('/api/assets/categories')
-const { data: propertyData } = await useFetch('/api/properties')
-const { data: vendorData } = await useFetch('/api/procurement/vendors')
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api'
 
-const categories = computed(() => categoryData.value?.data || [])
-const properties = computed(() => propertyData.value?.data || [])
-const vendors = computed(() => vendorData.value?.data || [])
-
-const saving = ref(false)
+const creating = ref(false)
 
 const form = ref({
   name: '',
-  categoryId: '',
-  subcategory: '',
-  make: '',
-  model: '',
-  serialNumber: '',
   description: '',
-  propertyId: '',
-  location: '',
-  condition: 'excellent',
-  status: 'available',
-  assignedToId: '',
-  purchasePrice: null as number | null,
-  purchaseDate: '',
-  warrantyExpiry: '',
-  usefulLife: 5,
-  depreciationMethod: 'straight_line',
-  vendorId: '',
+  category: '',
+  condition: 'good',
+  property: '',
+  space: '',
+  manufacturer: '',
+  model_number: '',
+  serial_number: '',
+  specifications: '',
+  purchase_date: '',
+  purchase_price: null,
+  vendor: '',
+  warranty_expiry: '',
+  useful_life_years: null,
+  depreciation_rate: null,
+  photo_url: '',
+  document_url: '',
+  notes: ''
 })
 
-const submitAsset = async () => {
-  saving.value = true
+// Fetch categories, properties, and spaces
+const { data: categories } = await useFetch(`${API_BASE}/assets/categories/`, {
+  headers: authHeaders()
+})
+
+const { data: properties } = await useFetch(`${API_BASE}/properties/`, {
+  headers: authHeaders()
+})
+
+const { data: spaces } = await useFetch(`${API_BASE}/spaces/`, {
+  headers: authHeaders()
+})
+
+// Filter spaces by selected property
+const filteredSpaces = computed(() => {
+  if (!form.value.property) return []
+  return (spaces.value || []).filter((space: any) => {
+    return space.property === parseInt(form.value.property) || 
+           space.property_details?.id === parseInt(form.value.property)
+  })
+})
+
+const createAsset = async () => {
+  creating.value = true
   try {
-    console.log('Creating asset:', form.value)
-    await new Promise(r => setTimeout(r, 1000))
+    await $fetch(`${API_BASE}/assets/assets/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: form.value
+    })
+    
     navigateTo('/admin/assets')
+  } catch (e: any) {
+    if (e.data) {
+      const errors = Object.entries(e.data)
+        .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('\n')
+      alert(`Failed to create asset:\n${errors}`)
+    } else {
+      alert('Failed to create asset')
+    }
   } finally {
-    saving.value = false
+    creating.value = false
   }
 }
 </script>

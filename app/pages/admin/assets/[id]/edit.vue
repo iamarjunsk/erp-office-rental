@@ -1,227 +1,235 @@
 <template>
-    <div class="space-y-6" v-if="asset">
-        <!-- Header -->
-        <div class="flex items-center gap-4">
-            <NuxtLink :to="`/admin/assets/${route.params.id}`" class="p-2 hover:bg-muted rounded-full">
-                <Icon name="lucide:arrow-left" class="w-5 h-5" />
-            </NuxtLink>
-            <div>
-                <h1 class="text-3xl font-bold">Edit Asset</h1>
-                <p class="text-muted-foreground">{{ asset.assetNumber }} • {{ asset.name }}</p>
-            </div>
-        </div>
-
-        <form @submit.prevent="saveAsset" class="space-y-6">
-            <!-- Basic Information -->
-            <div class="bg-card border border-border rounded-xl p-6">
-                <h3 class="text-lg font-semibold mb-4">Basic Information</h3>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm font-medium">Asset Name *</label>
-                        <input v-model="form.name" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                            required />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Asset Number</label>
-                        <input v-model="form.assetNumber" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-muted border border-border rounded-lg" disabled />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Category *</label>
-                        <select v-model="form.categoryId"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" required>
-                            <option value="">Select category</option>
-                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Subcategory</label>
-                        <input v-model="form.subcategory" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Make</label>
-                        <input v-model="form.make" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Model</label>
-                        <input v-model="form.model" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Serial Number</label>
-                        <input v-model="form.serialNumber" type="text"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg font-mono" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Condition</label>
-                        <select v-model="form.condition"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
-                            <option value="excellent">Excellent</option>
-                            <option value="good">Good</option>
-                            <option value="fair">Fair</option>
-                            <option value="poor">Poor</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label class="text-sm font-medium">Description</label>
-                    <textarea v-model="form.description" rows="3"
-                        class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg resize-none"></textarea>
-                </div>
-            </div>
-
-            <!-- Location & Assignment -->
-            <div class="bg-card border border-border rounded-xl p-6">
-                <h3 class="text-lg font-semibold mb-4">Location & Assignment</h3>
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div>
-                        <label class="text-sm font-medium">Property</label>
-                        <select v-model="form.propertyId"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
-                            <option value="">Select property</option>
-                            <option value="1">Cyber Towers</option>
-                            <option value="2">IT Park Main</option>
-                            <option value="3">Business Hub</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Location Details</label>
-                        <input v-model="form.location" type="text" placeholder="e.g., Floor 3, Desk 42"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Status</label>
-                        <select v-model="form.status"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
-                            <option value="in_use">In Use</option>
-                            <option value="available">Available</option>
-                            <option value="under_maintenance">Under Maintenance</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Financial Information -->
-            <div class="bg-card border border-border rounded-xl p-6">
-                <h3 class="text-lg font-semibold mb-4">Financial Information</h3>
-                <div class="grid md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="text-sm font-medium">Purchase Price (₹)</label>
-                        <input v-model.number="form.purchasePrice" type="number"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Purchase Date</label>
-                        <input v-model="form.purchaseDate" type="date"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Warranty Expiry</label>
-                        <input v-model="form.warrantyExpiry" type="date"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Depreciation Method</label>
-                        <select v-model="form.depreciationMethod"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
-                            <option value="straight_line">Straight Line</option>
-                            <option value="declining_balance">Declining Balance</option>
-                            <option value="sum_of_years">Sum of Years</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Useful Life (Years)</label>
-                        <input v-model.number="form.usefulLife" type="number"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                    <div>
-                        <label class="text-sm font-medium">Salvage Value (₹)</label>
-                        <input v-model.number="form.salvageValue" type="number"
-                            class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="flex justify-end gap-3">
-                <NuxtLink :to="`/admin/assets/${route.params.id}`"
-                    class="px-6 py-2 border border-border rounded-lg hover:bg-muted">
-                    Cancel
-                </NuxtLink>
-                <button type="submit"
-                    class="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
-                    Save Changes
-                </button>
-            </div>
-        </form>
+  <div class="space-y-6">
+    <div class="flex items-center gap-4">
+      <NuxtLink :to="`/admin/assets/${route.params.id}`" class="p-2 hover:bg-muted rounded-full">
+        <Icon name="lucide:arrow-left" class="w-5 h-5" />
+      </NuxtLink>
+      <div>
+        <h1 class="text-3xl font-bold">Edit Asset</h1>
+        <p class="text-muted-foreground">{{ asset?.asset_code }}</p>
+      </div>
     </div>
+
+    <form @submit.prevent="updateAsset" class="max-w-4xl space-y-8" v-if="form">
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Basic Information</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-medium">Asset Name *</label>
+            <input
+              v-model="form.name"
+              type="text"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div class="space-y-2 md:col-span-2">
+            <label class="text-sm font-medium">Description</label>
+            <textarea
+              v-model="form.description"
+              rows="3"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Category</label>
+            <select
+              v-model="form.category"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Select Category</option>
+              <option v-for="cat in categories" :key="cat.id" :value="cat.id">
+                {{ cat.name }}
+              </option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Condition</label>
+            <select
+              v-model="form.condition"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="excellent">Excellent</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+              <option value="poor">Poor</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Status</label>
+            <select
+              v-model="form.status"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="active">Active</option>
+              <option value="in_maintenance">In Maintenance</option>
+              <option value="damaged">Damaged</option>
+              <option value="disposed">Disposed</option>
+              <option value="lost">Lost</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Location</h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Property *</label>
+            <select
+              v-model="form.property"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            >
+              <option v-for="prop in properties" :key="prop.id" :value="prop.id">
+                {{ prop.name }}
+              </option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Space</label>
+            <select
+              v-model="form.space"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">No Space</option>
+              <option v-for="space in filteredSpaces" :key="space.id" :value="space.id">
+                {{ space.code }} - {{ space.name }}
+              </option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Purchase Information</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Purchase Date</label>
+            <input
+              v-model="form.purchase_date"
+              type="date"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Purchase Price (Rs.)</label>
+            <input
+              v-model.number="form.purchase_price"
+              type="number"
+              step="0.01"
+              min="0"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium">Warranty Expiry</label>
+            <input
+              v-model="form.warranty_expiry"
+              type="date"
+              class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Notes</h2>
+        <div class="space-y-2">
+          <textarea
+            v-model="form.notes"
+            rows="4"
+            class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 pt-4">
+        <button 
+          type="button"
+          @click="$router.back()"
+          class="px-4 py-2 border border-border rounded-lg hover:bg-muted"
+        >
+          Cancel
+        </button>
+        <button 
+          type="submit"
+          :disabled="saving"
+          class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+        >
+          {{ saving ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </form>
+  </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({
-    layout: 'admin',
-    middleware: ['auth'],
+  layout: 'admin',
+  middleware: ['auth'],
 })
+
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api'
 
 const route = useRoute()
-const { data: asset } = await useFetch(`/api/assets/${route.params.id}`)
-const { data: categoriesData } = await useFetch('/api/assets/categories')
+const saving = ref(false)
 
-const categories = computed(() => categoriesData.value || [])
-
-const form = ref({
-    name: '',
-    assetNumber: '',
-    categoryId: '',
-    subcategory: '',
-    make: '',
-    model: '',
-    serialNumber: '',
-    condition: 'good',
-    description: '',
-    propertyId: '',
-    location: '',
-    status: 'in_use',
-    purchasePrice: 0,
-    purchaseDate: '',
-    warrantyExpiry: '',
-    depreciationMethod: 'straight_line',
-    usefulLife: 5,
-    salvageValue: 0,
+const { data: asset, refresh } = await useFetch(`${API_BASE}/assets/assets/${route.params.id}/`, {
+  headers: authHeaders()
 })
 
-// Pre-populate form with existing asset data
+const { data: categories } = await useFetch(`${API_BASE}/assets/categories/`, {
+  headers: authHeaders()
+})
+
+const { data: properties } = await useFetch(`${API_BASE}/properties/`, {
+  headers: authHeaders()
+})
+
+const { data: spaces } = await useFetch(`${API_BASE}/spaces/`, {
+  headers: authHeaders()
+})
+
+const form = ref(null)
+
 watchEffect(() => {
-    if (asset.value) {
-        form.value = {
-            name: asset.value.name || '',
-            assetNumber: asset.value.assetNumber || '',
-            categoryId: asset.value.categoryId || '',
-            subcategory: asset.value.subcategory || '',
-            make: asset.value.make || '',
-            model: asset.value.model || '',
-            serialNumber: asset.value.serialNumber || '',
-            condition: asset.value.condition || 'good',
-            description: asset.value.description || '',
-            propertyId: asset.value.propertyId || '',
-            location: asset.value.location || '',
-            status: asset.value.status || 'in_use',
-            purchasePrice: asset.value.purchasePrice || 0,
-            purchaseDate: asset.value.purchaseDate?.split('T')[0] || '',
-            warrantyExpiry: asset.value.warrantyExpiry?.split('T')[0] || '',
-            depreciationMethod: asset.value.depreciationMethod || 'straight_line',
-            usefulLife: asset.value.usefulLife || 5,
-            salvageValue: asset.value.salvageValue || 0,
-        }
-    }
+  if (asset.value) {
+    form.value = { ...asset.value }
+  }
 })
 
-const saveAsset = () => {
-    console.log('Saving asset:', form.value)
-    alert('Asset updated successfully! (Mock)')
+const filteredSpaces = computed(() => {
+  if (!form.value?.property) return []
+  return (spaces.value || []).filter((space: any) => {
+    return space.property === form.value.property || 
+           space.property_details?.id === form.value.property
+  })
+})
+
+const updateAsset = async () => {
+  saving.value = true
+  try {
+    await $fetch(`${API_BASE}/assets/assets/${route.params.id}/`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: form.value
+    })
+    
+    await refresh()
     navigateTo(`/admin/assets/${route.params.id}`)
+  } catch (e: any) {
+    if (e.data) {
+      const errors = Object.entries(e.data)
+        .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('\n')
+      alert(`Failed to update asset:\n${errors}`)
+    } else {
+      alert('Failed to update asset')
+    }
+  } finally {
+    saving.value = false
+  }
 }
 </script>

@@ -6,79 +6,81 @@
         <p class="text-muted-foreground">Track and manage all facility assets</p>
       </div>
       <div class="flex gap-2">
-        <button class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
-          <Icon name="lucide:download" class="w-4 h-4" />
-          Export
+        <button 
+          @click="exportAssets"
+          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-all duration-200 hover:scale-105 group"
+        >
+          <Icon name="lucide:download" class="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+          <span class="group-hover:font-medium">Export</span>
         </button>
         <NuxtLink 
           to="/admin/assets/create"
-          class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+          class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-md group"
         >
-          <Icon name="lucide:plus" class="w-4 h-4" />
-          Add Asset
+          <Icon name="lucide:plus" class="w-4 h-4 transition-transform group-hover:scale-110" />
+          <span class="group-hover:font-medium">Add Asset</span>
         </NuxtLink>
       </div>
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-card border border-border rounded-xl p-4">
         <div class="text-2xl font-bold">{{ stats.total }}</div>
         <div class="text-sm text-muted-foreground">Total Assets</div>
       </div>
-      <div 
-        class="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-sm"
-        :class="statusFilter === 'in_use' ? 'ring-2 ring-primary' : ''"
-        @click="toggleStatusFilter('in_use')"
-      >
-        <div class="text-2xl font-bold text-green-600">{{ stats.in_use }}</div>
-        <div class="text-sm text-muted-foreground">In Use</div>
-      </div>
-      <div 
-        class="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-sm"
-        :class="statusFilter === 'available' ? 'ring-2 ring-primary' : ''"
-        @click="toggleStatusFilter('available')"
-      >
-        <div class="text-2xl font-bold text-blue-600">{{ stats.available }}</div>
-        <div class="text-sm text-muted-foreground">Available</div>
-      </div>
-      <div 
-        class="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-sm"
-        :class="statusFilter === 'under_maintenance' ? 'ring-2 ring-primary' : ''"
-        @click="toggleStatusFilter('under_maintenance')"
-      >
-        <div class="text-2xl font-bold text-amber-600">{{ stats.under_maintenance }}</div>
-        <div class="text-sm text-muted-foreground">Maintenance</div>
+      <div class="bg-card border border-border rounded-xl p-4">
+        <div class="text-2xl font-bold text-green-600">{{ stats.active }}</div>
+        <div class="text-sm text-muted-foreground">Active</div>
       </div>
       <div class="bg-card border border-border rounded-xl p-4">
-        <div class="text-2xl font-bold">₹{{ (stats.totalValue / 100000).toFixed(1) }}L</div>
+        <div class="text-2xl font-bold text-amber-600">{{ stats.inMaintenance }}</div>
+        <div class="text-sm text-muted-foreground">In Maintenance</div>
+      </div>
+      <div class="bg-card border border-border rounded-xl p-4">
+        <div class="text-2xl font-bold">{{ formatCurrency(stats.totalValue) }}</div>
         <div class="text-sm text-muted-foreground">Total Value</div>
       </div>
     </div>
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-4">
-      <div class="flex-1 min-w-[250px]">
+      <div class="flex-1 min-w-[250px] relative">
+        <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input 
-          v-model="search"
+          v-model="searchQuery"
           type="text"
-          placeholder="Search by asset number, name, or serial..."
-          class="w-full px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          placeholder="Search by asset code, name, or serial..."
+          class="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         />
       </div>
+      <select 
+        v-model="statusFilter"
+        class="px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        <option value="">All Status</option>
+        <option value="active">Active</option>
+        <option value="in_maintenance">In Maintenance</option>
+        <option value="damaged">Damaged</option>
+        <option value="disposed">Disposed</option>
+        <option value="lost">Lost</option>
+      </select>
       <select 
         v-model="categoryFilter"
         class="px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
       >
         <option value="">All Categories</option>
-        <option v-for="cat in categories" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
+        <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
       </select>
       <select 
-        v-model="propertyFilter"
+        v-model="conditionFilter"
         class="px-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
       >
-        <option value="">All Properties</option>
-        <option v-for="prop in properties" :key="prop.id" :value="prop.name">{{ prop.name }}</option>
+        <option value="">All Conditions</option>
+        <option value="excellent">Excellent</option>
+        <option value="good">Good</option>
+        <option value="fair">Fair</option>
+        <option value="poor">Poor</option>
       </select>
     </div>
 
@@ -98,14 +100,14 @@
         </thead>
         <tbody class="divide-y divide-border">
           <tr 
-            v-for="asset in filteredAssets" 
+            v-for="asset in assets" 
             :key="asset.id"
             class="hover:bg-muted/30 transition-colors"
           >
             <td class="px-4 py-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Icon :name="getCategoryIcon(asset.category?.code)" class="w-5 h-5 text-primary" />
+                  <Icon name="lucide:package" class="w-5 h-5 text-primary" />
                 </div>
                 <div>
                   <NuxtLink 
@@ -114,160 +116,163 @@
                   >
                     {{ asset.name }}
                   </NuxtLink>
-                  <div class="text-xs text-muted-foreground">{{ asset.assetNumber }}</div>
+                  <div class="text-xs text-muted-foreground">{{ asset.asset_code }}</div>
                 </div>
               </div>
             </td>
             <td class="px-4 py-4">
-              <div class="text-sm">{{ asset.category?.name }}</div>
-              <div class="text-xs text-muted-foreground">{{ asset.subcategory }}</div>
+              <div class="text-sm">{{ asset.category_details?.name || 'Uncategorized' }}</div>
             </td>
             <td class="px-4 py-4">
-              <div class="text-sm">{{ asset.property?.name }}</div>
-              <div class="text-xs text-muted-foreground">{{ asset.location }}</div>
+              <div class="text-sm">{{ asset.property_details?.name }}</div>
+              <div class="text-xs text-muted-foreground">{{ asset.space_details?.code }}</div>
             </td>
             <td class="px-4 py-4">
-              <div v-if="asset.assignedTo" class="flex items-center gap-2">
+              <div v-if="asset.assigned_to_details" class="flex items-center gap-2">
                 <div class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary">
-                  {{ asset.assignedTo.firstName?.[0] }}{{ asset.assignedTo.lastName?.[0] }}
+                  {{ asset.assigned_to_details.first_name?.[0] }}{{ asset.assigned_to_details.last_name?.[0] }}
                 </div>
                 <div>
-                  <div class="text-sm">{{ asset.assignedTo.firstName }} {{ asset.assignedTo.lastName }}</div>
-                  <div class="text-xs text-muted-foreground">{{ asset.assignedTo.department }}</div>
+                  <div class="text-sm">{{ asset.assigned_to_details.first_name }} {{ asset.assigned_to_details.last_name }}</div>
                 </div>
               </div>
               <span v-else class="text-sm text-muted-foreground">Unassigned</span>
             </td>
             <td class="px-4 py-4">
-              <div class="text-sm font-medium">₹{{ asset.currentValue?.toLocaleString() }}</div>
-              <div class="text-xs text-muted-foreground">Cost: ₹{{ asset.purchasePrice?.toLocaleString() }}</div>
+              <div class="text-sm font-medium">{{ formatCurrency(asset.purchase_price) }}</div>
+              <div class="text-xs text-muted-foreground" v-if="asset.purchase_date">{{ formatDate(asset.purchase_date) }}</div>
             </td>
             <td class="px-4 py-4">
               <span 
-                class="px-2 py-1 text-xs rounded-full font-medium"
+                class="px-2 py-1 text-xs rounded-full font-medium capitalize"
                 :class="getStatusClass(asset.status)"
               >
-                {{ formatStatus(asset.status) }}
+                {{ asset.status.replace('_', ' ') }}
               </span>
             </td>
             <td class="px-4 py-4 text-right">
               <div class="flex items-center justify-end gap-1">
                 <NuxtLink 
                   :to="`/admin/assets/${asset.id}`"
-                  class="p-2 hover:bg-muted rounded-lg"
+                  class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-all duration-200 hover:scale-110 group"
                   title="View Details"
                 >
-                  <Icon name="lucide:eye" class="w-4 h-4" />
+                  <Icon name="lucide:eye" class="w-4 h-4 transition-transform group-hover:scale-110" />
                 </NuxtLink>
-                <button 
-                  class="p-2 hover:bg-muted rounded-lg"
-                  title="QR Code"
+                <NuxtLink 
+                  :to="`/admin/assets/${asset.id}/edit`"
+                  class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-all duration-200 hover:scale-110 group"
+                  title="Edit"
                 >
-                  <Icon name="lucide:qr-code" class="w-4 h-4" />
-                </button>
-                <button 
-                  class="p-2 hover:bg-muted rounded-lg"
-                  title="Transfer"
-                >
-                  <Icon name="lucide:arrow-right-left" class="w-4 h-4" />
-                </button>
+                  <Icon name="lucide:pencil" class="w-4 h-4 transition-transform group-hover:rotate-12" />
+                </NuxtLink>
               </div>
+            </td>
+          </tr>
+          <tr v-if="assets.length === 0">
+            <td colspan="7" class="px-4 py-8 text-center text-muted-foreground">
+              No assets found
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-
-    <!-- Category Summary -->
-    <div class="grid md:grid-cols-4 gap-4">
-      <div 
-        v-for="cat in stats.byCategory" 
-        :key="cat.name"
-        class="bg-card border border-border rounded-xl p-4 cursor-pointer hover:shadow-sm"
-        :class="categoryFilter === cat.name ? 'ring-2 ring-primary' : ''"
-        @click="categoryFilter = categoryFilter === cat.name ? '' : cat.name"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <Icon :name="getCategoryIconByName(cat.name)" class="w-5 h-5 text-muted-foreground" />
-            <span class="font-medium">{{ cat.name }}</span>
-          </div>
-          <span class="text-lg font-bold">{{ cat.count }}</span>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: any
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-const { data } = await useFetch('/api/assets')
-const { data: categoryData } = await useFetch('/api/assets/categories')
-const { data: propertyData } = await useFetch('/api/properties')
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/assets'
 
-const search = ref('')
+const searchQuery = ref('')
 const statusFilter = ref('')
 const categoryFilter = ref('')
-const propertyFilter = ref('')
+const conditionFilter = ref('')
 
-const assets = computed(() => data.value?.data || [])
-const stats = computed(() => data.value?.stats || { total: 0, in_use: 0, available: 0, under_maintenance: 0, totalValue: 0, byCategory: [] })
-const categories = computed(() => categoryData.value?.data || [])
-const properties = computed(() => propertyData.value?.data || [])
-
-const toggleStatusFilter = (status: string) => {
-  statusFilter.value = statusFilter.value === status ? '' : status
-}
-
-const filteredAssets = computed(() => {
-  return assets.value.filter((asset: any) => {
-    const matchesSearch = !search.value || 
-      asset.assetNumber?.toLowerCase().includes(search.value.toLowerCase()) ||
-      asset.name?.toLowerCase().includes(search.value.toLowerCase()) ||
-      asset.serialNumber?.toLowerCase().includes(search.value.toLowerCase())
-    const matchesStatus = !statusFilter.value || asset.status === statusFilter.value
-    const matchesCategory = !categoryFilter.value || asset.category?.name === categoryFilter.value
-    const matchesProperty = !propertyFilter.value || asset.property?.name === propertyFilter.value
-    return matchesSearch && matchesStatus && matchesCategory && matchesProperty
-  })
+// Fetch stats
+const { data: statsData } = await useFetch(`${API_BASE}/assets/stats/`, {
+  headers: authHeaders()
 })
 
-const getCategoryIcon = (code: string) => {
-  const icons: Record<string, string> = {
-    IT: 'lucide:laptop',
-    FUR: 'lucide:armchair',
-    HVAC: 'lucide:wind',
-    SEC: 'lucide:shield',
-    ELE: 'lucide:zap',
-    VEH: 'lucide:car',
-  }
-  return icons[code] || 'lucide:package'
+const stats = computed(() => statsData.value || {
+  total: 0,
+  active: 0,
+  inMaintenance: 0,
+  disposed: 0,
+  totalValue: 0,
+  underWarranty: 0,
+  warrantyExpired: 0,
+  maintenanceDue: 0
+})
+
+// Fetch categories
+const { data: categories } = await useFetch(`${API_BASE}/categories/`, {
+  headers: authHeaders()
+})
+
+// Fetch assets
+const { data, refresh } = await useFetch(() => {
+  const params = new URLSearchParams()
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value) params.append('status', statusFilter.value)
+  if (categoryFilter.value) params.append('category', categoryFilter.value)
+  if (conditionFilter.value) params.append('condition', conditionFilter.value)
+  return `${API_BASE}/assets/?${params.toString()}`
+}, {
+  headers: authHeaders(),
+  watch: [statusFilter, categoryFilter, conditionFilter]
+})
+
+const assets = computed(() => data.value || [])
+
+// Update search with debounce
+watch(searchQuery, debounce(() => {
+  refresh()
+}, 500))
+
+const formatCurrency = (value: number) => {
+  if (!value) return 'N/A'
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(value)
 }
 
-const getCategoryIconByName = (name: string) => {
-  const icons: Record<string, string> = {
-    'IT Equipment': 'lucide:laptop',
-    'Furniture': 'lucide:armchair',
-    'HVAC': 'lucide:wind',
-    'Security': 'lucide:shield',
-  }
-  return icons[name] || 'lucide:package'
+const formatDate = (date: string | Date) => {
+  if (!date) return 'N/A'
+  return new Date(date).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
-    in_use: 'bg-green-100 text-green-700',
-    available: 'bg-blue-100 text-blue-700',
-    under_maintenance: 'bg-amber-100 text-amber-700',
+    active: 'bg-green-100 text-green-700',
+    in_maintenance: 'bg-amber-100 text-amber-700',
+    damaged: 'bg-red-100 text-red-700',
     disposed: 'bg-gray-100 text-gray-700',
     lost: 'bg-red-100 text-red-700',
   }
   return classes[status] || 'bg-gray-100 text-gray-700'
 }
 
-const formatStatus = (status: string) => status?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
+const exportAssets = () => {
+  alert('Export functionality coming soon!')
+}
 </script>
