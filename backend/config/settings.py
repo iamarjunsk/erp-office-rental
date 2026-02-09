@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.companies',
     'apps.leases',
     'apps.billing',
+    'apps.maintenance',
 ]
 
 MIDDLEWARE = [
