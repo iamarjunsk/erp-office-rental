@@ -14,6 +14,9 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 interface _GlobalComponents {
+  'UiToastProvider': typeof import("../../app/components/ui/toast-provider.vue").default
+  'UiToast': typeof import("../../app/components/ui/toast.vue").default
+  'UiToaster': typeof import("../../app/components/ui/toaster.vue").default
   'NuxtWelcome': typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default
   'NuxtLayout': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default
   'NuxtErrorBoundary': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default
@@ -39,6 +42,9 @@ interface _GlobalComponents {
   'Html': typeof import("../../node_modules/nuxt/dist/head/runtime/components").Html
   'Body': typeof import("../../node_modules/nuxt/dist/head/runtime/components").Body
   'NuxtIsland': typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island").default
+  'LazyUiToastProvider': LazyComponent<typeof import("../../app/components/ui/toast-provider.vue").default>
+  'LazyUiToast': LazyComponent<typeof import("../../app/components/ui/toast.vue").default>
+  'LazyUiToaster': LazyComponent<typeof import("../../app/components/ui/toaster.vue").default>
   'LazyNuxtWelcome': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue").default>
   'LazyNuxtLayout': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout").default>
   'LazyNuxtErrorBoundary': LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue").default>

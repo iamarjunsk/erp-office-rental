@@ -260,6 +260,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { success, error } = useToast()
 const API_BASE = 'http://localhost:8000/api'
 
 const creating = ref(false)
@@ -317,16 +318,22 @@ const createAsset = async () => {
       body: form.value
     })
     
+    success('Asset created successfully')
     navigateTo('/admin/assets')
   } catch (e: any) {
-    if (e.data) {
+    console.error('Create asset error:', e)
+    let errorMessage = 'Failed to create asset'
+    if (e.data && typeof e.data === 'object') {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create asset:\n${errors}`)
-    } else {
-      alert('Failed to create asset')
+      errorMessage = errors
+    } else if (e.data) {
+      errorMessage = String(e.data)
+    } else if (e.message) {
+      errorMessage = e.message
     }
+    error('Failed to create asset', errorMessage)
   } finally {
     creating.value = false
   }

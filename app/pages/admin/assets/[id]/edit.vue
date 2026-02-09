@@ -171,6 +171,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { success, error } = useToast()
 const API_BASE = 'http://localhost:8000/api'
 
 const route = useRoute()
@@ -218,16 +219,22 @@ const updateAsset = async () => {
     })
     
     await refresh()
+    success('Asset updated successfully')
     navigateTo(`/admin/assets/${route.params.id}`)
   } catch (e: any) {
-    if (e.data) {
+    console.error('Update asset error:', e)
+    let errorMessage = 'Failed to update asset'
+    if (e.data && typeof e.data === 'object') {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update asset:\n${errors}`)
-    } else {
-      alert('Failed to update asset')
+      errorMessage = errors
+    } else if (e.data) {
+      errorMessage = String(e.data)
+    } else if (e.message) {
+      errorMessage = e.message
     }
+    error('Failed to update asset', errorMessage)
   } finally {
     saving.value = false
   }

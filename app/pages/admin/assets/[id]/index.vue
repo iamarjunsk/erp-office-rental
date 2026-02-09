@@ -253,6 +253,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { success, error } = useToast()
 const API_BASE = 'http://localhost:8000/api/assets'
 
 const route = useRoute()
@@ -323,8 +324,10 @@ const assignAsset = async () => {
     showAssignModal.value = false
     await refresh()
     assignForm.value = { assigned_to: '', notes: '' }
+    success('Asset assigned successfully')
   } catch (e: any) {
-    alert('Failed to assign asset')
+    console.error('Assign error:', e)
+    error('Failed to assign asset', e.data || e.message || 'Unknown error')
   } finally {
     assigning.value = false
   }
@@ -338,8 +341,10 @@ const returnAsset = async () => {
       headers: authHeaders()
     })
     await refresh()
+    success('Asset returned successfully')
   } catch (e: any) {
-    alert('Failed to return asset')
+    console.error('Return error:', e)
+    error('Failed to return asset', e.data || e.message || 'Unknown error')
   } finally {
     returning.value = false
   }
@@ -362,8 +367,10 @@ const addMaintenance = async () => {
       vendor_name: '',
       next_maintenance_date: ''
     }
+    success('Maintenance record added')
   } catch (e: any) {
-    alert('Failed to add maintenance record')
+    console.error('Maintenance error:', e)
+    error('Failed to add maintenance record', e.data || e.message || 'Unknown error')
   } finally {
     addingMaintenance.value = false
   }

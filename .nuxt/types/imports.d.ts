@@ -169,6 +169,7 @@ declare global {
   const useSlots: typeof import('vue').useSlots
   const useState: typeof import('../../node_modules/nuxt/dist/app/composables/state').useState
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useToast: typeof import('../../app/composables/use-toast').useToast
   const useTransitionState: typeof import('vue').useTransitionState
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
@@ -186,6 +187,9 @@ declare global {
   // @ts-ignore
   export type { Component, ComponentPublicInstance, ComputedRef, DirectiveBinding, ExtractDefaultPropTypes, ExtractPropTypes, ExtractPublicPropTypes, InjectionKey, PropType, Ref, MaybeRef, MaybeRefOrGetter, VNode, WritableComputedRef } from 'vue'
   import('vue')
+  // @ts-ignore
+  export type { ToastVariant, Toast } from '../../app/composables/use-toast'
+  import('../../app/composables/use-toast')
 }
 // for vue template auto import
 import { UnwrapRef } from 'vue'
@@ -359,6 +363,7 @@ declare module 'vue' {
     readonly useSlots: UnwrapRef<typeof import('vue')['useSlots']>
     readonly useState: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/state')['useState']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
+    readonly useToast: UnwrapRef<typeof import('../../app/composables/use-toast')['useToast']>
     readonly useTransitionState: UnwrapRef<typeof import('vue')['useTransitionState']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>

@@ -3,6 +3,7 @@
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
+    <UiToastProvider />
   </div>
 </template>
 
@@ -10,14 +11,10 @@
 const { initAuth, setupTokenRefresh } = useAuth()
 
 onMounted(async () => {
-  // Initialize auth from localStorage
   await initAuth()
-  
-  // Setup automatic token refresh
   setupTokenRefresh()
 })
 
-// Also initialize on app setup for SSR compatibility
 if (process.client) {
   await initAuth()
 }

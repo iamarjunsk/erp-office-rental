@@ -195,6 +195,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { info } = useToast()
 const API_BASE = 'http://localhost:8000/api/assets'
 
 const searchQuery = ref('')
@@ -273,6 +274,6 @@ const getStatusClass = (status: string) => {
 }
 
 const exportAssets = () => {
-  alert('Export functionality coming soon!')
+  info('Export functionality coming soon!')
 }
 </script>
