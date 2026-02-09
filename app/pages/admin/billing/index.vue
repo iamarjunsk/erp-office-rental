@@ -116,26 +116,30 @@
                 <div class="flex items-center gap-2">
                   <button 
                     @click="viewInvoice(invoice)"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted transition-all duration-200 hover:scale-110 group"
                     title="View"
                   >
-                    <Icon name="lucide:eye" class="w-4 h-4" />
+                    <Icon name="lucide:eye" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   </button>
                   <button 
                     @click="downloadInvoice(invoice)"
                     :disabled="downloadingId === invoice.id"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted disabled:opacity-50"
+                    class="p-2 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:hover:scale-100 group"
                     title="Download PDF"
                   >
-                    <Icon :name="downloadingId === invoice.id ? 'lucide:loader-2' : 'lucide:download'" class="w-4 h-4" :class="{ 'animate-spin': downloadingId === invoice.id }" />
+                    <Icon 
+                      :name="downloadingId === invoice.id ? 'lucide:loader-2' : 'lucide:download'" 
+                      class="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" 
+                      :class="{ 'animate-spin': downloadingId === invoice.id }" 
+                    />
                   </button>
                   <button 
                     @click="recordPayment(invoice)"
                     v-if="invoice.balance_due > 0"
-                    class="p-2 text-green-600 hover:text-green-700 rounded-lg hover:bg-green-50"
+                    class="p-2 text-green-600 hover:text-green-700 rounded-lg hover:bg-green-50 transition-all duration-200 hover:scale-110 group"
                     title="Record Payment"
                   >
-                    <Icon name="lucide:banknote" class="w-4 h-4" />
+                    <Icon name="lucide:banknote" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   </button>
                 </div>
               </td>

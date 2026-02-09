@@ -155,8 +155,8 @@ def generate_invoice_pdf(invoice):
         items_data.append([
             item.description,
             str(item.quantity),
-            f"₹{item.unit_price:,.2f}",
-            f"₹{item.line_total:,.2f}"
+            f"Rs. {item.unit_price:,.2f}",
+            f"Rs. {item.line_total:,.2f}"
         ])
     
     items_table = Table(items_data, colWidths=[80*mm, 25*mm, 35*mm, 35*mm])
@@ -188,17 +188,17 @@ def generate_invoice_pdf(invoice):
     
     # Totals Section
     totals_data = [
-        ['Subtotal:', f"₹{invoice.subtotal:,.2f}"],
-        [f"GST ({invoice.gst_rate}%):", f"₹{invoice.tax_amount:,.2f}"],
+        ['Subtotal:', f"Rs. {invoice.subtotal:,.2f}"],
+        [f"GST ({invoice.gst_rate}%):", f"Rs. {invoice.tax_amount:,.2f}"],
     ]
     
     if invoice.discount_amount > 0:
-        totals_data.append(['Discount:', f"-₹{invoice.discount_amount:,.2f}"])
+        totals_data.append(['Discount:', f"-Rs. {invoice.discount_amount:,.2f}"])
     
     totals_data.extend([
-        ['Total Amount:', f"₹{invoice.total_amount:,.2f}"],
-        ['Amount Paid:', f"₹{invoice.amount_paid:,.2f}"],
-        ['Balance Due:', f"₹{invoice.balance_due:,.2f}"],
+        ['Total Amount:', f"Rs. {invoice.total_amount:,.2f}"],
+        ['Amount Paid:', f"Rs. {invoice.amount_paid:,.2f}"],
+        ['Balance Due:', f"Rs. {invoice.balance_due:,.2f}"],
     ])
     
     totals_table = Table(totals_data, colWidths=[130*mm, 45*mm])

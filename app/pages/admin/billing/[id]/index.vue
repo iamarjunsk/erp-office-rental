@@ -28,25 +28,29 @@
         <button 
           @click="downloadInvoice"
           :disabled="downloading"
-          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted disabled:opacity-50"
+          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted hover:scale-105 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:shadow-none group"
         >
-          <Icon :name="downloading ? 'lucide:loader-2' : 'lucide:download'" class="w-4 h-4" :class="{ 'animate-spin': downloading }" />
-          {{ downloading ? 'Downloading...' : 'Download' }}
+          <Icon 
+            :name="downloading ? 'lucide:loader-2' : 'lucide:download'" 
+            class="w-4 h-4 transition-transform duration-200 group-hover:-translate-y-0.5" 
+            :class="{ 'animate-spin': downloading }" 
+          />
+          <span class="group-hover:font-medium transition-all">{{ downloading ? 'Downloading...' : 'Download' }}</span>
         </button>
         <button 
           v-if="invoice?.balance_due > 0"
           @click="showPaymentModal = true"
-          class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 hover:scale-105 hover:shadow-md transition-all duration-200 group"
         >
-          <Icon name="lucide:banknote" class="w-4 h-4" />
-          Record Payment
+          <Icon name="lucide:banknote" class="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
+          <span class="group-hover:font-medium transition-all">Record Payment</span>
         </button>
         <NuxtLink 
           :to="`/admin/billing/${route.params.id}/edit`"
-          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted"
+          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted hover:scale-105 transition-all duration-200 group"
         >
-          <Icon name="lucide:pencil" class="w-4 h-4" />
-          Edit
+          <Icon name="lucide:pencil" class="w-4 h-4 transition-transform duration-200 group-hover:rotate-12" />
+          <span class="group-hover:font-medium transition-all">Edit</span>
         </NuxtLink>
       </div>
     </div>
