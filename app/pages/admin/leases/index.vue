@@ -5,32 +5,32 @@
         <h1 class="text-3xl font-bold">Leases</h1>
         <p class="text-muted-foreground">Manage lease agreements</p>
       </div>
-      <button class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+      <NuxtLink to="/admin/leases/create" class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
         <Icon name="lucide:plus" class="w-4 h-4" />
         New Lease
-      </button>
+      </NuxtLink>
     </div>
 
     <!-- Summary Cards -->
     <div class="grid gap-4 md:grid-cols-4">
       <div class="bg-card border border-border rounded-lg p-4">
         <p class="text-sm text-muted-foreground">Active Leases</p>
-        <p class="text-2xl font-bold">28</p>
-        <p class="text-xs text-green-500">+3 this month</p>
+        <p class="text-2xl font-bold">{{ stats.active }}</p>
+        <p class="text-xs text-green-500">Currently active</p>
       </div>
       <div class="bg-card border border-border rounded-lg p-4">
         <p class="text-sm text-muted-foreground">Expiring Soon</p>
-        <p class="text-2xl font-bold">5</p>
+        <p class="text-2xl font-bold">{{ stats.expiring }}</p>
         <p class="text-xs text-amber-500">Within 30 days</p>
       </div>
       <div class="bg-card border border-border rounded-lg p-4">
         <p class="text-sm text-muted-foreground">Monthly Rent</p>
-        <p class="text-2xl font-bold">₹12,50,000</p>
-        <p class="text-xs text-green-500">+5% from last month</p>
+        <p class="text-2xl font-bold">{{ formatCurrency(stats.monthlyRent) }}</p>
+        <p class="text-xs text-muted-foreground">Total monthly</p>
       </div>
       <div class="bg-card border border-border rounded-lg p-4">
         <p class="text-sm text-muted-foreground">Security Deposits</p>
-        <p class="text-2xl font-bold">₹45,00,000</p>
+        <p class="text-2xl font-bold">{{ formatCurrency(stats.securityDeposits) }}</p>
         <p class="text-xs text-muted-foreground">Held in escrow</p>
       </div>
     </div>
@@ -72,13 +72,13 @@
           </thead>
           <tbody class="divide-y divide-border">
             <tr v-for="lease in leases" :key="lease.id" class="hover:bg-muted/50">
-              <td class="px-4 py-3 text-sm font-medium">{{ lease.leaseNumber }}</td>
-              <td class="px-4 py-3 text-sm">{{ lease.company?.name }}</td>
-              <td class="px-4 py-3 text-sm">{{ lease.space?.code }}</td>
+              <td class="px-4 py-3 text-sm font-medium">{{ lease.lease_number }}</td>
+              <td class="px-4 py-3 text-sm">{{ lease.company_details?.name }}</td>
+              <td class="px-4 py-3 text-sm">{{ lease.space_details?.code }}</td>
               <td class="px-4 py-3 text-sm capitalize">{{ lease.type.replace('_', ' ') }}</td>
-              <td class="px-4 py-3 text-sm">{{ formatDate(lease.startDate) }}</td>
-              <td class="px-4 py-3 text-sm">{{ formatDate(lease.endDate) }}</td>
-              <td class="px-4 py-3 text-sm">{{ formatCurrency(lease.rentAmount) }}</td>
+              <td class="px-4 py-3 text-sm">{{ formatDate(lease.start_date) }}</td>
+              <td class="px-4 py-3 text-sm">{{ formatDate(lease.end_date) }}</td>
+              <td class="px-4 py-3 text-sm">{{ formatCurrency(lease.rent_amount) }}</td>
               <td class="px-4 py-3 text-sm">
                 <span 
                   class="px-2 py-1 rounded-full text-xs font-medium"
@@ -94,10 +94,16 @@
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="viewLease(lease)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </button>
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="editLease(lease)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </button>
                 </div>
@@ -116,50 +122,65 @@
 </template>
 
 <script setup lang="ts">
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: any
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-// Mock data for leases
-const leases = ref([
-  {
-    id: 1,
-    leaseNumber: 'LSE-2024-001',
-    company: { name: 'Tech Solutions Pvt Ltd' },
-    space: { code: 'FL-01-101' },
-    type: 'lease',
-    startDate: '2024-01-01',
-    endDate: '2026-12-31',
-    rentAmount: 50000,
-    status: 'active',
-  },
-  {
-    id: 2,
-    leaseNumber: 'LSE-2024-002',
-    company: { name: 'Innovate Labs' },
-    space: { code: 'FL-02-201' },
-    type: 'license',
-    startDate: '2024-03-01',
-    endDate: '2025-02-28',
-    rentAmount: 150000,
-    status: 'active',
-  },
-  {
-    id: 3,
-    leaseNumber: 'LSE-2024-003',
-    company: { name: 'Digital Marketing Co' },
-    space: { code: 'FL-01-102' },
-    type: 'coworking_membership',
-    startDate: '2024-06-01',
-    endDate: '2025-05-31',
-    rentAmount: 20000,
-    status: 'active',
-  },
-])
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/leases'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
+
+// Fetch leases with filters
+const { data, pending: loading, refresh } = await useFetch(() => {
+  const params = new URLSearchParams()
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value) params.append('status', statusFilter.value)
+  return `${API_BASE}/?${params.toString()}`
+}, {
+  headers: authHeaders(),
+  watch: [statusFilter]
+})
+
+const leases = computed(() => data.value || [])
+
+// Calculate stats
+const stats = computed(() => {
+  const allLeases = leases.value
+  const active = allLeases.filter((l: any) => l.status === 'active').length
+  
+  const today = new Date()
+  const thirtyDaysFromNow = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+  const expiring = allLeases.filter((l: any) => {
+    const endDate = new Date(l.end_date)
+    return l.status === 'active' && endDate <= thirtyDaysFromNow && endDate >= today
+  }).length
+  
+  const monthlyRent = allLeases
+    .filter((l: any) => l.status === 'active')
+    .reduce((sum: number, l: any) => sum + Number(l.rent_amount), 0)
+  
+  const securityDeposits = allLeases
+    .filter((l: any) => l.status === 'active')
+    .reduce((sum: number, l: any) => sum + Number(l.security_deposit), 0)
+  
+  return { active, expiring, monthlyRent, securityDeposits }
+})
+
+// Update search with debounce
+watch(searchQuery, debounce(() => {
+  refresh()
+}, 500))
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('en-IN', {
@@ -175,5 +196,13 @@ const formatDate = (date: string | Date) => {
     month: 'short',
     year: 'numeric',
   })
+}
+
+const viewLease = (lease: any) => {
+  navigateTo(`/admin/leases/${lease.id}`)
+}
+
+const editLease = (lease: any) => {
+  navigateTo(`/admin/leases/${lease.id}/edit`)
 }
 </script>

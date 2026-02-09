@@ -12,6 +12,7 @@ urlpatterns = [
     path('api/properties/', include('apps.properties.urls')),
     path('api/spaces/', include('apps.spaces.urls')),
     path('api/companies/', include('apps.companies.urls')),
+    path('api/leases/', include('apps.leases.urls')),
 ]
 
 if settings.DEBUG:

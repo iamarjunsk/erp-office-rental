@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.properties',
     'apps.spaces',
     'apps.companies',
+    'apps.leases',
 ]
 
 MIDDLEWARE = [
