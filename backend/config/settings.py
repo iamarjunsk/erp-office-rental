@@ -28,12 +28,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'django_filters',
     # Local apps
     'apps.users',
     'apps.properties',
     'apps.spaces',
     'apps.companies',
     'apps.leases',
+    'apps.billing',
 ]
 
 MIDDLEWARE = [
