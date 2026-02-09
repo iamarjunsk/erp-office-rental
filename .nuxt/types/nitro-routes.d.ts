@@ -9,6 +9,9 @@ declare module "nitropack/types" {
     '/api/assets/categories': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/assets/categories.get').default>>>>
     }
+    '/api/assets/export': {
+      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/assets/export.get').default>>>>
+    }
     '/api/assets': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/assets/index.get').default>>>>
     }

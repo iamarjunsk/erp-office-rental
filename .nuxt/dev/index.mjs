@@ -1,5 +1,5 @@
 import process from 'node:process';globalThis._importMeta_={url:import.meta.url,env:process.env};import { tmpdir } from 'node:os';
-import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file:///Users/arjunsk/Desktop/personal/Kimi_Agent_Nuxt%20ERP%20%E9%9C%80%E6%B1%82%E8%A1%A5%E5%85%A8/erp-office-rental/node_modules/h3/dist/index.mjs';
+import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getHeader, getResponseStatusText } from 'file:///Users/arjunsk/Desktop/personal/Kimi_Agent_Nuxt%20ERP%20%E9%9C%80%E6%B1%82%E8%A1%A5%E5%85%A8/erp-office-rental/node_modules/h3/dist/index.mjs';
 import { Server } from 'node:http';
 import { resolve, dirname, join } from 'node:path';
 import nodeCrypto from 'node:crypto';
@@ -2134,7 +2134,22 @@ const plugins = [
 _wfF2mwbw3rlBRt1kXI1tT_M77pdB4QPtI_8KZoe29o
 ];
 
-const assets = {};
+const assets = {
+  "/index.mjs": {
+    "type": "text/javascript; charset=utf-8",
+    "etag": "\"26f56-e2jTnQllZJoSoHPNRv7v3ja14iw\"",
+    "mtime": "2026-02-09T19:27:01.549Z",
+    "size": 159574,
+    "path": "index.mjs"
+  },
+  "/index.mjs.map": {
+    "type": "application/json",
+    "etag": "\"9b67f-OBWwbqCPkK9NX+QwuHBcZKKo2Xc\"",
+    "mtime": "2026-02-09T19:27:01.550Z",
+    "size": 636543,
+    "path": "index.mjs.map"
+  }
+};
 
 function readAsset (id) {
   const serverDir = dirname$1(fileURLToPath(globalThis._importMeta_.url));
@@ -2585,6 +2600,7 @@ async function getIslandContext(event) {
 
 const _lazy_zZi2pJ = () => Promise.resolve().then(function () { return _id__get$7; });
 const _lazy_uePMbm = () => Promise.resolve().then(function () { return categories_get$1; });
+const _lazy_9vVAm6 = () => Promise.resolve().then(function () { return export_get$1; });
 const _lazy_hjP7lU = () => Promise.resolve().then(function () { return index_get$1; });
 const _lazy_TUZ65v = () => Promise.resolve().then(function () { return companies_get$1; });
 const _lazy_Wkfv4m = () => Promise.resolve().then(function () { return purchaseOrders_get$1; });
@@ -2601,6 +2617,7 @@ const handlers = [
   { route: '', handler: _1tal89, lazy: false, middleware: true, method: undefined },
   { route: '/api/assets/:id', handler: _lazy_zZi2pJ, lazy: true, middleware: false, method: "get" },
   { route: '/api/assets/categories', handler: _lazy_uePMbm, lazy: true, middleware: false, method: "get" },
+  { route: '/api/assets/export', handler: _lazy_9vVAm6, lazy: true, middleware: false, method: "get" },
   { route: '/api/assets', handler: _lazy_hjP7lU, lazy: true, middleware: false, method: "get" },
   { route: '/api/companies', handler: _lazy_TUZ65v, lazy: true, middleware: false, method: "get" },
   { route: '/api/procurement/purchase-orders', handler: _lazy_Wkfv4m, lazy: true, middleware: false, method: "get" },
@@ -3178,6 +3195,73 @@ const categories_get = defineEventHandler((event) => {
 const categories_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: categories_get
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const export_get = defineEventHandler(async (event) => {
+  const query = getQuery$1(event);
+  const format = query.export_format || "csv";
+  const authToken = getHeader(event, "authorization");
+  try {
+    const backendUrl = process.env.API_URL || "http://localhost:8000/api";
+    const params = new URLSearchParams();
+    if (query.search) params.append("search", String(query.search));
+    if (query.status) params.append("status", String(query.status));
+    if (query.category) params.append("category", String(query.category));
+    if (query.condition) params.append("condition", String(query.condition));
+    params.append("limit", "100");
+    const response = await fetch(`${backendUrl}/assets/assets/?${params.toString()}`, {
+      headers: {
+        "Authorization": authToken || "",
+        "Content-Type": "application/json"
+      }
+    });
+    if (!response.ok) {
+      throw new Error(`Backend returned ${response.status}`);
+    }
+    const assets = await response.json();
+    if (format === "csv") {
+      return generateCSV(assets, event);
+    } else {
+      return generateCSV(assets, event);
+    }
+  } catch (error) {
+    console.error("Export error:", error);
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to export assets",
+      data: { detail: error.message }
+    });
+  }
+});
+function generateCSV(assets, event) {
+  const headers = ["Asset Code", "Name", "Category", "Status", "Condition", "Property", "Space", "Purchase Price", "Purchase Date", "Assigned To"];
+  const rows = assets.map((asset) => {
+    var _a, _b, _c;
+    return [
+      asset.asset_code || "",
+      asset.name || "",
+      ((_a = asset.category_details) == null ? void 0 : _a.name) || "",
+      asset.status || "",
+      asset.condition || "",
+      ((_b = asset.property_details) == null ? void 0 : _b.name) || "",
+      ((_c = asset.space_details) == null ? void 0 : _c.code) || "",
+      asset.purchase_price || 0,
+      asset.purchase_date || "",
+      asset.assigned_to_details ? `${asset.assigned_to_details.first_name} ${asset.assigned_to_details.last_name}` : ""
+    ];
+  });
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+  ].join("\n");
+  setResponseHeader(event, "Content-Type", "text/csv");
+  setResponseHeader(event, "Content-Disposition", `attachment; filename="assets_export_${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.csv"`);
+  return csvContent;
+}
+
+const export_get$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: export_get
 }, Symbol.toStringTag, { value: 'Module' }));
 
 const index_get = defineEventHandler((event) => {

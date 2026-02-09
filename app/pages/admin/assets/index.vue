@@ -6,13 +6,42 @@
         <p class="text-muted-foreground">Track and manage all facility assets</p>
       </div>
       <div class="flex gap-2">
-        <button 
-          @click="exportAssets"
-          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-all duration-200 hover:scale-105 group"
-        >
-          <Icon name="lucide:download" class="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
-          <span class="group-hover:font-medium">Export</span>
-        </button>
+        <div class="relative">
+          <button 
+            @click="showExportMenu = !showExportMenu"
+            class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-all duration-200 hover:scale-105 group"
+          >
+            <Icon name="lucide:download" class="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />
+            <span class="group-hover:font-medium">Export</span>
+            <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1" />
+          </button>
+          <div 
+            v-if="showExportMenu"
+            class="absolute right-0 mt-2 w-40 bg-card border border-border rounded-lg shadow-lg py-1 z-10"
+          >
+            <button 
+              @click="exportAssets('csv')"
+              class="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+            >
+              <Icon name="lucide:file-text" class="w-4 h-4" />
+              Export CSV
+            </button>
+            <button 
+              @click="exportAssets('xlsx')"
+              class="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+            >
+              <Icon name="lucide:file-spreadsheet" class="w-4 h-4" />
+              Export Excel
+            </button>
+            <button 
+              @click="exportAssets('pdf')"
+              class="w-full px-4 py-2 text-left text-sm hover:bg-muted flex items-center gap-2"
+            >
+              <Icon name="lucide:file" class="w-4 h-4" />
+              Export PDF
+            </button>
+          </div>
+        </div>
         <NuxtLink 
           to="/admin/assets/create"
           class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all duration-200 hover:scale-105 hover:shadow-md group"
@@ -181,6 +210,7 @@
 </template>
 
 <script setup lang="ts">
+import { onClickOutside } from '@vueuse/core'
 const debounce = (fn: Function, delay: number) => {
   let timeoutId: any
   return (...args: any[]) => {
@@ -195,13 +225,15 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
-const { info } = useToast()
+const { info, success, error } = useToast()
 const API_BASE = 'http://localhost:8000/api/assets'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
 const categoryFilter = ref('')
 const conditionFilter = ref('')
+const showExportMenu = ref(false)
+const exporting = ref(false)
 
 // Fetch stats
 const { data: statsData } = await useFetch(`${API_BASE}/assets/stats/`, {
@@ -273,7 +305,47 @@ const getStatusClass = (status: string) => {
   return classes[status] || 'bg-gray-100 text-gray-700'
 }
 
-const exportAssets = () => {
-  info('Export functionality coming soon!')
+const closeExportMenu = () => {
+  showExportMenu.value = false
 }
+
+const exportAssets = async (format: string) => {
+  closeExportMenu()
+  exporting.value = true
+  
+  try {
+    const params = new URLSearchParams()
+    if (searchQuery.value) params.append('search', searchQuery.value)
+    if (statusFilter.value) params.append('status', statusFilter.value)
+    if (categoryFilter.value) params.append('category', categoryFilter.value)
+    if (conditionFilter.value) params.append('condition', conditionFilter.value)
+    params.append('export_format', format)
+
+    const response = await $fetch(`/api/assets/export?${params.toString()}`, {
+      headers: authHeaders(),
+      responseType: 'blob'
+    })
+
+    const blob = response as Blob
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    
+    const ext = format === 'xlsx' ? 'xlsx' : 'csv'
+    link.download = `assets_export_${new Date().toISOString().split('T')[0]}.${ext}`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
+
+    success('Export successful', 'Assets have been downloaded')
+  } catch (e: any) {
+    console.error('Export error:', e)
+    error('Export failed', e.data?.detail || 'Please try again')
+  } finally {
+    exporting.value = false
+  }
+}
+
+onClickOutside(ref(null), closeExportMenu)
 </script>
