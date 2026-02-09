@@ -9,6 +9,9 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/users/', include('apps.users.urls')),
+    path('api/properties/', include('apps.properties.urls')),
+    path('api/spaces/', include('apps.spaces.urls')),
+    path('api/companies/', include('apps.companies.urls')),
 ]
 
 if settings.DEBUG:

@@ -65,7 +65,7 @@
                 <span class="capitalize">{{ property.type.replace('_', ' ') }}</span>
               </td>
               <td class="px-4 py-3 text-sm">{{ property.city }}, {{ property.state }}</td>
-              <td class="px-4 py-3 text-sm">{{ property.totalArea.toLocaleString() }}</td>
+              <td class="px-4 py-3 text-sm">{{ property.total_area?.toLocaleString() }}</td>
               <td class="px-4 py-3 text-sm">
                 <span 
                   class="px-2 py-1 rounded-full text-xs font-medium"
@@ -79,7 +79,7 @@
                 </span>
               </td>
               <td class="px-4 py-3 text-sm">
-                {{ property.manager ? `${property.manager.firstName} ${property.manager.lastName}` : 'Unassigned' }}
+                {{ property.manager_details ? `${property.manager_details.first_name} ${property.manager_details.last_name}` : 'Unassigned' }}
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
@@ -135,22 +135,58 @@
 </template>
 
 <script setup lang="ts">
+// Simple debounce implementation since lodash-es is not available
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: any
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-const { data } = await useFetch('/api/properties')
-const properties = computed(() => data.value?.data || [])
-const pagination = computed(() => ({
-  ...data.value?.pagination,
-  start: ((data.value?.pagination?.page || 1) - 1) * (data.value?.pagination?.limit || 20) + 1,
-  end: Math.min((data.value?.pagination?.page || 1) * (data.value?.pagination?.limit || 20), data.value?.pagination?.total || 0),
-}))
+const { getAccessToken, authHeaders } = useAuth()
+const config = useRuntimeConfig()
+// Use hardcoded localhost for now matching verification success
+const API_BASE = 'http://localhost:8000/api/properties'
 
+const page = ref(1)
 const searchQuery = ref('')
 const statusFilter = ref('')
-const page = ref(1)
+const limit = 10
+
+// Fetch with simplified URL structure matching DRF
+const { data, pending: loading, refresh } = await useFetch(() => {
+  const params = new URLSearchParams()
+  if (page.value > 1) params.append('page', page.value.toString())
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value) params.append('status', statusFilter.value)
+  return `${API_BASE}/?${params.toString()}`
+}, {
+  headers: authHeaders(),
+  watch: [page, statusFilter] // Search handled by debounce separately
+})
+
+// Update search with debounce
+ watch(searchQuery, debounce(() => {
+  page.value = 1
+  refresh()
+}, 500))
+
+// Handle DRF pagination structure
+const properties = computed(() => data.value?.results || [])
+const totalCount = computed(() => data.value?.count || 0)
+
+const pagination = computed(() => ({
+  start: (page.value - 1) * limit + 1,
+  end: Math.min(page.value * limit, totalCount.value),
+  total: totalCount.value,
+  totalPages: Math.ceil(totalCount.value / limit)
+}))
 
 const viewProperty = (property: any) => {
   navigateTo(`/admin/properties/${property.id}`)

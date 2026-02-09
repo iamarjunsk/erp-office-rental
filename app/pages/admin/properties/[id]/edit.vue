@@ -158,28 +158,74 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+const { authHeaders } = useAuth()
+// Use hardcoded localhost for now matching verification success
+const API_BASE = 'http://localhost:8000/api/properties'
+
 const route = useRoute()
 const saving = ref(false)
-const { data: property } = await useFetch(`/api/properties/${route.params.id}`)
+const { data: property, refresh } = await useFetch(`${API_BASE}/${route.params.id}/`, {
+  headers: authHeaders()
+})
 
 const formData = ref(null)
 
 // Initialize form data when property is loaded
 watchEffect(() => {
   if (property.value) {
-    formData.value = { ...property.value }
+    formData.value = {
+      code: property.value.code,
+      name: property.value.name,
+      type: property.value.type,
+      address: property.value.address,
+      city: property.value.city,
+      state: property.value.state,
+      pincode: property.value.pincode,
+      totalArea: property.value.total_area, // Map snake_case to camelCase for form
+      buildYear: property.value.build_year,
+      floors: property.value.floors,
+      status: property.value.status
+    }
   }
 })
 
 const updateProperty = async () => {
   saving.value = true
   try {
-    console.log('Updating property:', formData.value)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Map camelCase to snake_case for backend
+    const payload = {
+      code: formData.value.code,
+      name: formData.value.name,
+      type: formData.value.type,
+      address: formData.value.address,
+      city: formData.value.city,
+      state: formData.value.state,
+      pincode: formData.value.pincode,
+      total_area: formData.value.totalArea,
+      build_year: formData.value.buildYear,
+      floors: formData.value.floors,
+      status: formData.value.status
+    }
+
+    await $fetch(`${API_BASE}/${route.params.id}/`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: payload
+    })
+    
+    // Refresh data to show latest
+    await refresh()
     navigateTo(`/admin/properties/${route.params.id}`)
-  } catch (error) {
-    console.error(error)
+  } catch (e: any) {
+    if (e.data) {
+       // Format validation errors to readable string
+      const errors = Object.entries(e.data)
+        .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('\n')
+      alert(`Failed to update property:\n${errors}`)
+    } else {
+      alert('Failed to update property')
+    }
   } finally {
     saving.value = false
   }

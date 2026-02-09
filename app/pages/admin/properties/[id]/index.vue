@@ -51,7 +51,7 @@
             </div>
             <div>
               <p class="text-sm text-muted-foreground">Total Area</p>
-              <p class="font-medium">{{ property?.totalArea.toLocaleString() }} sqft</p>
+              <p class="font-medium">{{ property?.total_area?.toLocaleString() }} sqft</p>
             </div>
             <div>
               <p class="text-sm text-muted-foreground">Floors</p>
@@ -59,7 +59,7 @@
             </div>
             <div>
               <p class="text-sm text-muted-foreground">Build Year</p>
-              <p class="font-medium">{{ property?.buildYear || 'N/A' }}</p>
+              <p class="font-medium">{{ property?.build_year || 'N/A' }}</p>
             </div>
           </div>
         </div>
@@ -99,7 +99,7 @@
             </div>
             <div>
               <p class="font-medium">
-                {{ property?.manager ? `${property.manager.firstName} ${property.manager.lastName}` : 'Unassigned' }}
+                {{ property?.manager_details ? `${property.manager_details.first_name} ${property.manager_details.last_name}` : 'Unassigned' }}
               </p>
               <p class="text-xs text-muted-foreground">Property Manager</p>
             </div>
@@ -116,6 +116,12 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+const { authHeaders } = useAuth()
+// Use hardcoded localhost for now matching verification success
+const API_BASE = 'http://localhost:8000/api/properties'
+
 const route = useRoute()
-const { data: property } = await useFetch(`/api/properties/${route.params.id}`)
+const { data: property } = await useFetch(`${API_BASE}/${route.params.id}/`, {
+  headers: authHeaders()
+})
 </script>

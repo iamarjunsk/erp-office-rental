@@ -156,6 +156,10 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+const { authHeaders } = useAuth()
+// Use hardcoded localhost for now matching verification success
+const API_BASE = 'http://localhost:8000/api/properties'
+
 const creating = ref(false)
 
 const newProperty = ref({
@@ -174,12 +178,38 @@ const newProperty = ref({
 const createProperty = async () => {
   creating.value = true
   try {
-    console.log('Creating property:', newProperty.value)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    // Map camelCase to snake_case for backend
+    const payload = {
+      code: newProperty.value.code,
+      name: newProperty.value.name,
+      type: newProperty.value.type,
+      address: newProperty.value.address,
+      city: newProperty.value.city,
+      state: newProperty.value.state,
+      pincode: newProperty.value.pincode,
+      total_area: newProperty.value.totalArea,
+      build_year: newProperty.value.buildYear,
+      floors: newProperty.value.floors,
+      status: 'active' // Default status
+    }
+
+    await $fetch(`${API_BASE}/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: payload
+    })
+    
     navigateTo('/admin/properties')
-  } catch (error) {
-    console.error(error)
+  } catch (e: any) {
+    if (e.data) {
+      // Format validation errors to readable string
+      const errors = Object.entries(e.data)
+        .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+        .join('\n')
+      alert(`Failed to create property:\n${errors}`)
+    } else {
+      alert('Failed to create property')
+    }
   } finally {
     creating.value = false
   }

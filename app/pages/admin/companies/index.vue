@@ -49,10 +49,10 @@
               <td class="px-4 py-3 text-sm">
                 <div>
                   <p class="font-medium">{{ company.name }}</p>
-                  <p class="text-xs text-muted-foreground">{{ company.legalName }}</p>
+                  <p class="text-xs text-muted-foreground">{{ company.legal_name }}</p>
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm uppercase">{{ company.type }}</td>
+              <td class="px-4 py-3 text-sm uppercase">{{ company.type.replace('_', ' ') }}</td>
               <td class="px-4 py-3 text-sm">{{ company.industry || '-' }}</td>
               <td class="px-4 py-3 text-sm font-mono">{{ company.gstin || '-' }}</td>
               <td class="px-4 py-3 text-sm">{{ company.city }}, {{ company.state }}</td>
@@ -62,14 +62,14 @@
                     <div 
                       class="h-full rounded-full"
                       :class="{
-                        'bg-red-500': (company.creditScore || 0) < 50,
-                        'bg-amber-500': (company.creditScore || 0) >= 50 && (company.creditScore || 0) < 75,
-                        'bg-green-500': (company.creditScore || 0) >= 75,
+                        'bg-red-500': (company.credit_score || 0) < 50,
+                        'bg-amber-500': (company.credit_score || 0) >= 50 && (company.credit_score || 0) < 75,
+                        'bg-green-500': (company.credit_score || 0) >= 75,
                       }"
-                      :style="{ width: `${company.creditScore || 0}%` }"
+                      :style="{ width: `${company.credit_score || 0}%` }"
                     />
                   </div>
-                  <span class="text-xs">{{ company.creditScore || 0 }}</span>
+                  <span class="text-xs">{{ company.credit_score || 0 }}</span>
                 </div>
               </td>
               <td class="px-4 py-3 text-sm">
@@ -86,10 +86,16 @@
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="viewCompany(company)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </button>
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="editCompany(company)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </button>
                 </div>
@@ -108,14 +114,48 @@
 </template>
 
 <script setup lang="ts">
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: any
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-const { data } = await useFetch('/api/companies')
-const companies = computed(() => data.value?.data || [])
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/companies'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
+
+// Fetch companies with filters
+const { data, pending: loading, refresh } = await useFetch(() => {
+  const params = new URLSearchParams()
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value) params.append('status', statusFilter.value)
+  return `${API_BASE}/?${params.toString()}`
+}, {
+  headers: authHeaders(),
+  watch: [statusFilter]
+})
+
+const companies = computed(() => data.value || [])
+
+// Update search with debounce
+watch(searchQuery, debounce(() => {
+  refresh()
+}, 500))
+
+const viewCompany = (company: any) => {
+  navigateTo(`/admin/companies/${company.id}`)
+}
+
+const editCompany = (company: any) => {
+  navigateTo(`/admin/companies/${company.id}/edit`)
+}
 </script>

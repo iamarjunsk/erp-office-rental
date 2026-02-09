@@ -5,10 +5,13 @@
         <h1 class="text-3xl font-bold">Spaces</h1>
         <p class="text-muted-foreground">Manage office spaces and meeting rooms</p>
       </div>
-      <button class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">
+      <NuxtLink 
+        to="/admin/spaces/create"
+        class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+      >
         <Icon name="lucide:plus" class="w-4 h-4" />
         Add Space
-      </button>
+      </NuxtLink>
     </div>
 
     <div class="flex flex-col sm:flex-row gap-4">
@@ -57,31 +60,37 @@
           <tbody class="divide-y divide-border">
             <tr v-for="space in spaces" :key="space.id" class="hover:bg-muted/50">
               <td class="px-4 py-3 text-sm font-medium">{{ space.code }}</td>
-              <td class="px-4 py-3 text-sm">{{ space.property?.name }}</td>
+              <td class="px-4 py-3 text-sm">{{ space.property_details?.name }}</td>
               <td class="px-4 py-3 text-sm capitalize">{{ space.type.replace('_', ' ') }}</td>
               <td class="px-4 py-3 text-sm">{{ space.floor }}</td>
-              <td class="px-4 py-3 text-sm">{{ space.area.toLocaleString() }} sqft</td>
+              <td class="px-4 py-3 text-sm">{{ Number(space.area).toLocaleString() }} sqft</td>
               <td class="px-4 py-3 text-sm">{{ space.capacity || '-' }}</td>
-              <td class="px-4 py-3 text-sm">{{ formatCurrency(space.baseRent) }}</td>
+              <td class="px-4 py-3 text-sm">{{ formatCurrency(space.base_rent) }}</td>
               <td class="px-4 py-3 text-sm">
                 <span 
                   class="px-2 py-1 rounded-full text-xs font-medium"
                   :class="{
-                    'bg-green-100 text-green-700': space.currentStatus === 'available',
-                    'bg-blue-100 text-blue-700': space.currentStatus === 'occupied',
-                    'bg-amber-100 text-amber-700': space.currentStatus === 'maintenance',
-                    'bg-purple-100 text-purple-700': space.currentStatus === 'reserved',
+                    'bg-green-100 text-green-700': space.current_status === 'available',
+                    'bg-blue-100 text-blue-700': space.current_status === 'occupied',
+                    'bg-amber-100 text-amber-700': space.current_status === 'maintenance',
+                    'bg-purple-100 text-purple-700': space.current_status === 'reserved',
                   }"
                 >
-                  {{ space.currentStatus }}
+                  {{ space.current_status }}
                 </span>
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="viewSpace(space)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </button>
-                  <button class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted">
+                  <button 
+                    @click="editSpace(space)"
+                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
+                  >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </button>
                 </div>
@@ -100,17 +109,44 @@
 </template>
 
 <script setup lang="ts">
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: any
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
-const { data } = await useFetch('/api/spaces')
-const spaces = computed(() => data.value?.data || [])
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/spaces'
 
 const searchQuery = ref('')
 const statusFilter = ref('')
 const typeFilter = ref('')
+
+// Fetch spaces with filters
+const { data, pending: loading, refresh } = await useFetch(() => {
+  const params = new URLSearchParams()
+  if (searchQuery.value) params.append('search', searchQuery.value)
+  if (statusFilter.value) params.append('status', statusFilter.value)
+  if (typeFilter.value) params.append('type', typeFilter.value)
+  return `${API_BASE}/?${params.toString()}`
+}, {
+  headers: authHeaders(),
+  watch: [statusFilter, typeFilter]
+})
+
+const spaces = computed(() => data.value || [])
+
+// Update search with debounce
+watch(searchQuery, debounce(() => {
+  refresh()
+}, 500))
 
 const formatCurrency = (value: number | null) => {
   if (!value) return '-'
@@ -119,5 +155,13 @@ const formatCurrency = (value: number | null) => {
     currency: 'INR',
     maximumFractionDigits: 0,
   }).format(value)
+}
+
+const viewSpace = (space: any) => {
+  navigateTo(`/admin/spaces/${space.id}`)
+}
+
+const editSpace = (space: any) => {
+  navigateTo(`/admin/spaces/${space.id}/edit`)
 }
 </script>
