@@ -11,8 +11,14 @@
                 <p class="text-slate-400 mt-2">Sign in to your account</p>
             </div>
 
+            <!-- Loading State -->
+            <div v-if="isAuthChecking" class="bg-card border border-border rounded-2xl p-8 shadow-2xl text-center">
+                <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin mx-auto text-primary mb-4" />
+                <p class="text-muted-foreground">Checking authentication...</p>
+            </div>
+
             <!-- Login Card -->
-            <div class="bg-card border border-border rounded-2xl p-8 shadow-2xl">
+            <div v-else class="bg-card border border-border rounded-2xl p-8 shadow-2xl">
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
                     <div>
@@ -99,13 +105,29 @@ definePageMeta({
     layout: 'blank',
 })
 
-const { login, isLoading, error } = useAuth()
+const { login, isLoading, error, isAuthenticated, isInitialized, initAuth } = useAuth()
+const isAuthChecking = ref(true)
 
 const form = ref({
     email: '',
     password: '',
 })
 const showPassword = ref(false)
+
+// Check auth status on mount
+onMounted(async () => {
+    // Wait for auth initialization
+    if (!isInitialized.value) {
+        await initAuth()
+    }
+    
+    // If already authenticated, redirect to admin
+    if (isAuthenticated.value) {
+        navigateTo('/admin')
+    }
+    
+    isAuthChecking.value = false
+})
 
 const handleLogin = async () => {
     const result = await login(form.value)

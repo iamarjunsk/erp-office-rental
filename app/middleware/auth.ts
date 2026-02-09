@@ -1,9 +1,17 @@
-export default defineNuxtRouteMiddleware((to, from) => {
-    const { isAuthenticated } = useAuth();
+export default defineNuxtRouteMiddleware(async (to, from) => {
+    // Skip auth check for login and register pages
+    if (to.path === '/login' || to.path === '/register') {
+        return;
+    }
 
-    // Skip on server side to avoid hydration mismatch with localStorage
-    if (process.server) return;
-
+    const { isInitialized, initAuth, isAuthenticated } = useAuth();
+    
+    // Wait for auth initialization on client side
+    if (process.client && !isInitialized.value) {
+        await initAuth();
+    }
+    
+    // Check if authenticated
     if (!isAuthenticated.value) {
         return navigateTo("/login");
     }

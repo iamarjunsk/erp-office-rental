@@ -38,28 +38,33 @@ interface RegisterData {
 const API_BASE = "http://localhost:8000/api/users";
 
 export const useAuth = () => {
+    // Use localStorage-backed state for persistence
+    const accessToken = useState<string | null>("access_token", () => null);
+    const refreshToken = useState<string | null>("refresh_token", () => null);
     const user = useState<User | null>("auth_user", () => null);
-    const isAuthenticated = computed(() => !!user.value);
+    const isAuthenticated = computed(() => !!accessToken.value && !!user.value);
     const isLoading = useState("auth_loading", () => false);
     const error = useState<string | null>("auth_error", () => null);
+    const isInitialized = useState("auth_initialized", () => false);
 
-    // Get tokens from cookie
-    const getAccessToken = () => {
+    // Initialize from localStorage on client side
+    const initFromStorage = () => {
         if (process.client) {
-            return localStorage.getItem("access_token");
+            const storedAccess = localStorage.getItem("access_token");
+            const storedRefresh = localStorage.getItem("refresh_token");
+            if (storedAccess) accessToken.value = storedAccess;
+            if (storedRefresh) refreshToken.value = storedRefresh;
         }
-        return null;
     };
 
-    const getRefreshToken = () => {
-        if (process.client) {
-            return localStorage.getItem("refresh_token");
-        }
-        return null;
-    };
+    // Get tokens
+    const getAccessToken = () => accessToken.value;
+    const getRefreshToken = () => refreshToken.value;
 
-    // Save tokens
+    // Save tokens to state and localStorage
     const saveTokens = (tokens: AuthTokens) => {
+        accessToken.value = tokens.access;
+        refreshToken.value = tokens.refresh;
         if (process.client) {
             localStorage.setItem("access_token", tokens.access);
             localStorage.setItem("refresh_token", tokens.refresh);
@@ -68,6 +73,9 @@ export const useAuth = () => {
 
     // Clear tokens
     const clearTokens = () => {
+        accessToken.value = null;
+        refreshToken.value = null;
+        user.value = null;
         if (process.client) {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
@@ -78,6 +86,38 @@ export const useAuth = () => {
     const authHeaders = () => {
         const token = getAccessToken();
         return token ? { Authorization: `Bearer ${token}` } : {};
+    };
+
+    // Refresh access token
+    const refreshAccessToken = async (): Promise<boolean> => {
+        const currentRefresh = getRefreshToken();
+        if (!currentRefresh) {
+            clearTokens();
+            return false;
+        }
+
+        try {
+            const response = await $fetch<{ access: string }>(
+                `${API_BASE}/token/refresh/`,
+                {
+                    method: "POST",
+                    body: { refresh: currentRefresh },
+                },
+            );
+
+            if (response.access) {
+                accessToken.value = response.access;
+                if (process.client) {
+                    localStorage.setItem("access_token", response.access);
+                }
+                return true;
+            }
+            return false;
+        } catch (e: any) {
+            console.error("Token refresh failed:", e);
+            clearTokens();
+            return false;
+        }
     };
 
     // Login
@@ -99,7 +139,8 @@ export const useAuth = () => {
 
             return { success: true };
         } catch (e: any) {
-            error.value = e.data?.error || "Login failed";
+            error.value = e.data?.error || e.data?.detail || "Login failed";
+            console.error("Login error:", e);
             return { success: false, error: error.value };
         } finally {
             isLoading.value = false;
@@ -128,7 +169,9 @@ export const useAuth = () => {
             error.value =
                 e.data?.email?.[0] ||
                 e.data?.password?.[0] ||
+                e.data?.detail ||
                 "Registration failed";
+            console.error("Register error:", e);
             return { success: false, error: error.value };
         } finally {
             isLoading.value = false;
@@ -137,15 +180,17 @@ export const useAuth = () => {
 
     // Logout
     const logout = () => {
-        user.value = null;
         clearTokens();
         navigateTo("/login");
     };
 
     // Fetch user profile
-    const fetchProfile = async () => {
+    const fetchProfile = async (): Promise<User | null> => {
         const token = getAccessToken();
-        if (!token) return null;
+        if (!token) {
+            clearTokens();
+            return null;
+        }
 
         try {
             const response = await $fetch<User>(`${API_BASE}/me/`, {
@@ -153,45 +198,55 @@ export const useAuth = () => {
             });
             user.value = response;
             return response;
-        } catch (e) {
-            // Token might be expired, try refresh
-            const refreshed = await refreshAccessToken();
-            if (refreshed) {
-                return fetchProfile();
+        } catch (e: any) {
+            // If unauthorized, try to refresh token
+            if (e.statusCode === 401) {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    // Retry fetching profile with new token
+                    try {
+                        const response = await $fetch<User>(`${API_BASE}/me/`, {
+                            headers: authHeaders(),
+                        });
+                        user.value = response;
+                        return response;
+                    } catch (retryError) {
+                        console.error("Retry fetch profile failed:", retryError);
+                    }
+                }
             }
-            logout();
+            console.error("Fetch profile error:", e);
+            clearTokens();
             return null;
         }
     };
 
-    // Refresh access token
-    const refreshAccessToken = async () => {
-        const refreshToken = getRefreshToken();
-        if (!refreshToken) return false;
-
-        try {
-            const response = await $fetch<{ access: string }>(
-                `${API_BASE}/token/refresh/`,
-                {
-                    method: "POST",
-                    body: { refresh: refreshToken },
-                },
-            );
-
-            if (process.client) {
-                localStorage.setItem("access_token", response.access);
-            }
-            return true;
-        } catch (e) {
-            clearTokens();
+    // Initialize auth on app load
+    const initAuth = async (): Promise<boolean> => {
+        // Initialize from localStorage first
+        initFromStorage();
+        
+        const token = getAccessToken();
+        if (!token) {
+            isInitialized.value = true;
             return false;
         }
+
+        // Try to fetch profile, which will refresh token if needed
+        const profile = await fetchProfile();
+        isInitialized.value = true;
+        return !!profile;
     };
 
-    // Initialize auth on app load
-    const initAuth = async () => {
-        if (getAccessToken()) {
-            await fetchProfile();
+    // Setup automatic token refresh (every 50 minutes since token expires in 1 hour)
+    const setupTokenRefresh = () => {
+        if (process.client) {
+            // Refresh every 50 minutes (3000000 ms)
+            setInterval(async () => {
+                if (getRefreshToken()) {
+                    await refreshAccessToken();
+                }
+            }, 3000000);
         }
     };
 
@@ -199,13 +254,16 @@ export const useAuth = () => {
         user,
         isAuthenticated,
         isLoading,
+        isInitialized,
         error,
         login,
         register,
         logout,
         fetchProfile,
         initAuth,
+        refreshAccessToken,
         getAccessToken,
         authHeaders,
+        setupTokenRefresh,
     };
 };
