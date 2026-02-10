@@ -4,7 +4,7 @@ from .models import Vendor, PurchaseRequisition, PurchaseRequisitionItem, Purcha
 class VendorSerializer(serializers.ModelSerializer):
     contact = serializers.SerializerMethodField()
     address = serializers.SerializerMethodField()
-    bankDetails = serializers.SerializerMethodField()
+    bank_details = serializers.SerializerMethodField()
 
     # Write fields
     contact_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -24,7 +24,7 @@ class VendorSerializer(serializers.ModelSerializer):
         model = Vendor
         fields = [
             'id', 'name', 'code', 'vendor_type', 'category', 'status',
-            'contact', 'address', 'bankDetails', 'gst_number', 'pan_number',
+            'contact', 'address', 'bank_details', 'gst_number', 'pan_number',
             'contract_type', 'contract_expiry', 'rating', 'total_orders',
             'total_value', 'notes', 'created_at', 'updated_at',
             # Write-only fields
@@ -50,10 +50,10 @@ class VendorSerializer(serializers.ModelSerializer):
             'country': obj.address_country,
         }
 
-    def get_bankDetails(self, obj):
+    def get_bank_details(self, obj):
         return {
-            'bankName': obj.bank_name,
-            'accountNumber': obj.account_number,
+            'bank_name': obj.bank_name,
+            'account_number': obj.account_number,
             'ifsc': obj.ifsc_code,
         }
 
@@ -187,14 +187,14 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     vendor = serializers.SerializerMethodField()
     prepared_by = serializers.SerializerMethodField()
     approved_by = serializers.SerializerMethodField()
-    totalAmount = serializers.DecimalField(source='total_amount', max_digits=15, decimal_places=2)
+    total_amount = serializers.DecimalField(max_digits=15, decimal_places=2)
     
     class Meta:
         model = PurchaseOrder
         fields = [
             'id', 'po_number', 'pr', 'vendor', 'title',
             'terms', 'delivery_date', 'delivery_location', 'subtotal',
-            'tax_rate', 'tax_amount', 'shipping_cost', 'discount', 'totalAmount',
+            'tax_rate', 'tax_amount', 'shipping_cost', 'discount', 'total_amount',
             'status', 'prepared_by', 'approved_by', 'approved_at', 'sent_at',
             'received_at', 'notes', 'created_at', 'updated_at'
         ]
@@ -202,7 +202,8 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
     def get_pr(self, obj):
         if obj.pr:
             return {
-                'prNumber': obj.pr.pr_number,
+                'id': obj.pr.id,
+                'pr_number': obj.pr.pr_number,
                 'title': obj.pr.title,
             }
         return None
@@ -212,9 +213,9 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
             return {
                 'id': obj.vendor.id,
                 'name': obj.vendor.name,
-                'contact': obj.vendor.contact_name,
-                'email': obj.vendor.contact_email,
-                'phone': obj.vendor.contact_phone,
+                'contact_name': obj.vendor.contact_name,
+                'contact_email': obj.vendor.contact_email,
+                'contact_phone': obj.vendor.contact_phone,
             }
         return None
     
@@ -222,8 +223,8 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         if obj.prepared_by:
             return {
                 'id': obj.prepared_by.id,
-                'firstName': obj.prepared_by.first_name,
-                'lastName': obj.prepared_by.last_name,
+                'first_name': obj.prepared_by.first_name,
+                'last_name': obj.prepared_by.last_name,
             }
         return None
     
@@ -231,8 +232,8 @@ class PurchaseOrderListSerializer(serializers.ModelSerializer):
         if obj.approved_by:
             return {
                 'id': obj.approved_by.id,
-                'firstName': obj.approved_by.first_name,
-                'lastName': obj.approved_by.last_name,
+                'first_name': obj.approved_by.first_name,
+                'last_name': obj.approved_by.last_name,
             }
         return None
 

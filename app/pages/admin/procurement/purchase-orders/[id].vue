@@ -8,7 +8,7 @@
         </NuxtLink>
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-3xl font-bold">{{ po.poNumber }}</h1>
+            <h1 class="text-3xl font-bold">{{ po.po_number }}</h1>
             <span 
               class="px-3 py-1 text-sm rounded-full font-medium"
               :class="getStatusClass(po.status)"
@@ -20,7 +20,10 @@
         </div>
       </div>
       <div class="flex gap-2">
-        <button class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted">
+        <button 
+          @click="downloadPDF"
+          class="flex items-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted"
+        >
           <Icon name="lucide:download" class="w-4 h-4" />
           Download PDF
         </button>
@@ -51,19 +54,19 @@
         <div class="grid md:grid-cols-4 gap-4">
           <div class="bg-card border border-border rounded-xl p-4">
             <div class="text-sm text-muted-foreground">Subtotal</div>
-            <div class="text-xl font-bold">₹{{ po.subtotal?.toLocaleString() }}</div>
+            <div class="text-xl font-bold">₹{{ formatNumber(po.subtotal) }}</div>
           </div>
           <div class="bg-card border border-border rounded-xl p-4">
           <div class="text-sm text-muted-foreground">Tax ({{ po.tax_rate }}%)</div>
-          <div class="text-xl font-bold">₹{{ po.tax_amount?.toLocaleString() }}</div>
+          <div class="text-xl font-bold">₹{{ formatNumber(po.tax_amount) }}</div>
         </div>
         <div class="bg-card border border-border rounded-xl p-4">
           <div class="text-sm text-muted-foreground">Shipping</div>
-          <div class="text-xl font-bold">₹{{ po.shipping_cost?.toLocaleString() }}</div>
+          <div class="text-xl font-bold">₹{{ formatNumber(po.shipping_cost) }}</div>
         </div>
         <div class="bg-card border border-border rounded-xl p-4 bg-primary/5">
           <div class="text-sm text-muted-foreground">Total</div>
-          <div class="text-xl font-bold text-primary">₹{{ po.total_amount?.toLocaleString() }}</div>
+          <div class="text-xl font-bold text-primary">₹{{ formatNumber(po.total_amount) }}</div>
         </div>
       </div>
 
@@ -158,32 +161,32 @@
       </div>
 
       <!-- Sidebar -->
-      <div class="space-y-6">
+        <div class="space-y-6">
         <!-- Vendor Info -->
         <div class="bg-card border border-border rounded-xl p-6">
           <h3 class="font-semibold mb-4">Vendor</h3>
-          <div class="space-y-4">
+            <div class="space-y-4">
             <div>
               <div class="font-medium text-lg">{{ po.vendor?.name }}</div>
-              <div class="text-sm text-muted-foreground">{{ po.vendor?.address }}</div>
+              <div class="text-sm text-muted-foreground">{{ po.vendor?.address?.street }}, {{ po.vendor?.address?.city }}</div>
             </div>
             <div class="space-y-2 text-sm">
               <div class="flex items-center gap-2">
                 <Icon name="lucide:user" class="w-4 h-4 text-muted-foreground" />
-                <span>{{ po.vendor?.contact?.name }}</span>
+                <span>{{ po.vendor?.contact_name }}</span>
               </div>
               <div class="flex items-center gap-2">
                 <Icon name="lucide:mail" class="w-4 h-4 text-muted-foreground" />
-                <a :href="`mailto:${po.vendor?.contact?.email}`" class="text-primary hover:underline">{{ po.vendor?.contact?.email }}</a>
+                <a :href="`mailto:${po.vendor?.contact_email}`" class="text-primary hover:underline">{{ po.vendor?.contact_email }}</a>
               </div>
               <div class="flex items-center gap-2">
                 <Icon name="lucide:phone" class="w-4 h-4 text-muted-foreground" />
-                <span>{{ po.vendor?.contact?.phone }}</span>
+                <span>{{ po.vendor?.contact_phone }}</span>
               </div>
             </div>
             <div class="pt-2 border-t border-border text-sm">
               <div class="text-muted-foreground">GST Number</div>
-              <div class="font-mono">{{ po.vendor?.gstNumber }}</div>
+              <div class="font-mono">{{ po.vendor?.gst_number }}</div>
             </div>
           </div>
         </div>
@@ -196,9 +199,9 @@
               <div class="text-muted-foreground">Payment Terms</div>
               <div>{{ po.terms }}</div>
             </div>
-            <div v-if="po.paymentTerms">
+            <div v-if="po.payment_terms">
               <div class="text-muted-foreground">Payment Schedule</div>
-              <div>{{ po.paymentTerms }}</div>
+              <div>{{ po.payment_terms }}</div>
             </div>
           </div>
         </div>
@@ -207,7 +210,7 @@
         <div v-if="po.pr" class="bg-card border border-border rounded-xl p-6">
           <h3 class="font-semibold mb-4">Related Requisition</h3>
           <NuxtLink
-            :to="`/admin/procurement/requisitions/${po.prId}`"
+            :to="`/admin/procurement/requisitions/${po.pr?.id}`"
             class="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
           >
             <div class="font-medium text-primary">{{ po.pr.pr_number }}</div>
@@ -340,6 +343,7 @@ const getStatusClass = (status: string) => {
 const formatStatus = (status: string) => status?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
 const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'
 const formatDateTime = (date: string) => date ? new Date(date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
+const formatNumber = (num: any) => Number(num || 0).toLocaleString('en-IN')
 
 const getHistoryIcon = (action: string) => {
   const icons: Record<string, string> = {
@@ -415,6 +419,28 @@ const sendToVendor = async () => {
     await refreshPO()
   } finally {
     sending.value = false
+  }
+}
+
+const downloadPDF = async () => {
+  try {
+    const response = await fetch(`${API_BASE}/purchase-orders/${route.params.id}/pdf/`, {
+      headers: authHeaders(),
+    })
+    
+    if (!response.ok) throw new Error('Failed to download PDF')
+    
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = window.document.createElement('a')
+    a.href = url
+    a.download = `${po.value?.po_number || 'purchase-order'}.pdf`
+    window.document.body.appendChild(a)
+    a.click()
+    window.document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Error downloading PDF:', err)
   }
 }
 </script>

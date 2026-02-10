@@ -374,3 +374,17 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         
         serializer = PurchaseOrderDetailSerializer(po)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
+    def pdf(self, request, pk=None):
+        """Download PO as PDF"""
+        from django.http import HttpResponse
+        from .pdf_generator import generate_po_pdf
+        
+        po = self.get_object()
+        
+        pdf_content = generate_po_pdf(po)
+        
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{po.po_number}.pdf"'
+        return response

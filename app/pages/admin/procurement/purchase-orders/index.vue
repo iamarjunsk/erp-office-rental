@@ -58,9 +58,9 @@
                 :to="`/admin/procurement/purchase-orders/${po.id}`"
                 class="font-medium text-primary hover:underline"
               >
-                {{ po.poNumber }}
+                {{ po.po_number }}
               </NuxtLink>
-              <div v-if="po.pr" class="text-xs text-muted-foreground">{{ po.pr.prNumber }}</div>
+              <div v-if="po.pr" class="text-xs text-muted-foreground">{{ po.pr?.pr_number }}</div>
             </td>
             <td class="px-6 py-4">
               <div class="font-medium">{{ po.title }}</div>
@@ -68,12 +68,12 @@
             </td>
             <td class="px-6 py-4">
               <div class="font-medium">{{ po.vendor?.name }}</div>
-              <div class="text-xs text-muted-foreground">{{ po.vendor?.contact }}</div>
+              <div class="text-xs text-muted-foreground">{{ po.vendor?.contact_name }}</div>
             </td>
-            <td class="px-6 py-4 font-medium">₹{{ po.totalAmount?.toLocaleString() }}</td>
+            <td class="px-6 py-4 font-medium">₹{{ formatNumber(po.total_amount) }}</td>
             <td class="px-6 py-4">
-              <div class="text-sm">{{ formatDate(po.deliveryDate) }}</div>
-              <div class="text-xs text-muted-foreground">{{ po.deliveryLocation?.split(',')[0] }}</div>
+              <div class="text-sm">{{ formatDate(po.delivery_date) }}</div>
+              <div class="text-xs text-muted-foreground">{{ po.delivery_location?.split(',')[0] }}</div>
             </td>
             <td class="px-6 py-4">
               <span 
@@ -103,6 +103,7 @@
                 <button 
                   class="p-2 hover:bg-muted rounded-lg"
                   title="Download PDF"
+                  @click="downloadPDF(po.id)"
                 >
                   <Icon name="lucide:download" class="w-4 h-4" />
                 </button>
@@ -162,8 +163,31 @@ const getStatusClass = (status: string) => {
 
 const formatStatus = (status: string) => status?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
 const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : '-'
+const formatNumber = (num: any) => Number(num || 0).toLocaleString('en-IN')
 
 const recordReceipt = (id: number) => {
   navigateTo(`/admin/procurement/purchase-orders/${id}/receive`)
+}
+
+const downloadPDF = async (id: number) => {
+  try {
+    const response = await fetch(`${API_BASE}/purchase-orders/${id}/pdf/`, {
+      headers: authHeaders(),
+    })
+    
+    if (!response.ok) throw new Error('Failed to download PDF')
+    
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = window.document.createElement('a')
+    a.href = url
+    a.download = `purchase-order-${id}.pdf`
+    window.document.body.appendChild(a)
+    a.click()
+    window.document.body.removeChild(a)
+    window.URL.revokeObjectURL(url)
+  } catch (err) {
+    console.error('Error downloading PDF:', err)
+  }
 }
 </script>

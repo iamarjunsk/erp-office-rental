@@ -8,7 +8,7 @@
         </NuxtLink>
         <div>
           <div class="flex items-center gap-3">
-            <h1 class="text-3xl font-bold">{{ pr.prNumber }}</h1>
+            <h1 class="text-3xl font-bold">{{ pr.pr_number }}</h1>
             <span class="px-3 py-1 text-sm rounded-full font-medium" :class="getStatusClass(pr.status)">
               {{ formatStatus(pr.status) }}
             </span>
@@ -52,7 +52,7 @@
         <div class="grid md:grid-cols-3 gap-4">
           <div class="bg-card border border-border rounded-xl p-4">
           <div class="text-sm text-muted-foreground">Total Amount</div>
-          <div class="text-2xl font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</div>
+          <div class="text-2xl font-bold">₹{{ formatNumber(pr.total_estimated_amount) }}</div>
         </div>
         <div class="bg-card border border-border rounded-xl p-4">
           <div class="text-sm text-muted-foreground">Items</div>
@@ -92,7 +92,7 @@
           <tfoot class="bg-muted/30">
             <tr>
               <td colspan="3" class="px-4 py-3 text-right font-medium">Total Estimated</td>
-              <td class="px-4 py-3 text-right text-lg font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</td>
+              <td class="px-4 py-3 text-right text-lg font-bold">₹{{ formatNumber(pr.total_estimated_amount) }}</td>
             </tr>
           </tfoot>
         </table>
@@ -133,12 +133,12 @@
           <h3 class="font-semibold mb-4">Requester</h3>
           <div class="flex items-center gap-3 mb-4">
             <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <span class="font-medium text-primary">{{ pr.requestedBy?.firstName?.[0] }}{{
-                pr.requestedBy?.lastName?.[0] }}</span>
+              <span class="font-medium text-primary">{{ pr.requested_by?.first_name?.[0] }}{{
+                pr.requested_by?.last_name?.[0] }}</span>
             </div>
             <div>
-              <div class="font-medium">{{ pr.requestedBy?.firstName }} {{ pr.requestedBy?.lastName }}</div>
-              <div class="text-sm text-muted-foreground">{{ pr.requestedBy?.email }}</div>
+              <div class="font-medium">{{ pr.requested_by?.first_name }} {{ pr.requested_by?.last_name }}</div>
+              <div class="text-sm text-muted-foreground">{{ pr.requested_by?.email }}</div>
             </div>
           </div>
           <div class="space-y-2 text-sm">
@@ -234,6 +234,7 @@ const getPriorityClass = (priority: string) => {
 const formatStatus = (status: string) => status?.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')
 const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '-'
 const formatDateTime = (date: string) => date ? new Date(date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
+const formatNumber = (num: any) => Number(num || 0).toLocaleString('en-IN')
 
 const getHistoryIcon = (action: string) => {
   const icons: Record<string, string> = {

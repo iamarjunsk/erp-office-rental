@@ -7,7 +7,7 @@
       </NuxtLink>
       <div>
         <h1 class="text-3xl font-bold">Edit Requisition</h1>
-        <p class="text-muted-foreground">{{ requisition.prNumber }} - {{ requisition.title }}</p>
+        <p class="text-muted-foreground">{{ requisition.pr_number }} - {{ requisition.title }}</p>
       </div>
     </div>
 
