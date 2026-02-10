@@ -115,7 +115,11 @@ export const useAuth = () => {
             return false;
         } catch (e: any) {
             console.error("Token refresh failed:", e);
-            clearTokens();
+            // Only clear tokens on 401 (invalid/expired refresh token)
+            // Network errors should not log out the user
+            if (e.statusCode === 401) {
+                clearTokens();
+            }
             return false;
         }
     };
@@ -188,7 +192,6 @@ export const useAuth = () => {
     const fetchProfile = async (): Promise<User | null> => {
         const token = getAccessToken();
         if (!token) {
-            clearTokens();
             return null;
         }
 
@@ -214,9 +217,12 @@ export const useAuth = () => {
                         console.error("Retry fetch profile failed:", retryError);
                     }
                 }
+                // Token refresh failed (401), user will be redirected by middleware
+                return null;
             }
+            // For non-401 errors (network issues, server errors), don't clear tokens
+            // Just log the error and return null - user stays "authenticated" with existing token
             console.error("Fetch profile error:", e);
-            clearTokens();
             return null;
         }
     };
@@ -267,3 +273,6 @@ export const useAuth = () => {
         setupTokenRefresh,
     };
 };
+
+// Type export for use outside composables
+export type { User, AuthTokens, LoginCredentials, RegisterData };

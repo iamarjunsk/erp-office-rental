@@ -1,9 +1,9 @@
 <template>
-  <div class="min-h-screen bg-background text-foreground flex font-sans">
-    <!-- Sidebar -->
-    <aside class="w-[280px] border-r border-border bg-background flex flex-col hidden md:flex">
+  <div class="bg-background text-foreground flex font-sans">
+    <!-- Sidebar - Fixed height to screen -->
+    <aside class="fixed left-0 top-0 h-screen w-[280px] border-r border-border bg-background flex flex-col hidden md:flex z-50">
       <!-- Logo -->
-      <div class="p-6">
+      <div class="p-6 flex-shrink-0">
         <div class="flex items-center gap-3">
           <div class="bg-[#0f172a] text-white p-2 rounded-lg">
             <Icon name="lucide:building-2" class="w-6 h-6" />
@@ -27,7 +27,7 @@
       </nav>
 
       <!-- User Profile -->
-      <div class="p-4 border-t border-border mt-auto">
+      <div class="p-4 border-t border-border flex-shrink-0">
         <div class="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors group">
           <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center">
             <Icon name="lucide:user" class="w-5 h-5 text-slate-600" />
@@ -43,8 +43,8 @@
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto w-full bg-slate-50/50">
+    <!-- Main Content - Scrolls independently -->
+    <main class="flex-1 md:ml-[280px] min-h-screen bg-slate-50/50">
       <header class="h-16 border-b border-border bg-background flex items-center justify-between px-8 sticky top-0 z-10">
         <h1 class="text-xl font-bold text-slate-800 capitalize">{{ $route.path.split('/').pop()?.replace('-', ' ') || 'Dashboard' }}</h1>
         <div class="flex items-center gap-4">

@@ -190,6 +190,9 @@ declare global {
   // @ts-ignore
   export type { ToastVariant, Toast } from '../../app/composables/use-toast'
   import('../../app/composables/use-toast')
+  // @ts-ignore
+  export type { User, AuthTokens, LoginCredentials, RegisterData } from '../../app/composables/useAuth'
+  import('../../app/composables/useAuth')
 }
 // for vue template auto import
 import { UnwrapRef } from 'vue'

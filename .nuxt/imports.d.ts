@@ -31,6 +31,6 @@ export { setInterval } from '#app/compat/interval';
 export { definePageMeta } from '../node_modules/nuxt/dist/pages/runtime/composables';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
 export { useToast, ToastVariant, Toast } from '../app/composables/use-toast';
-export { useAuth } from '../app/composables/useAuth';
+export { useAuth, User, AuthTokens, LoginCredentials, RegisterData } from '../app/composables/useAuth';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';
 export { useNuxtDevTools } from '../node_modules/@nuxt/devtools/dist/runtime/use-nuxt-devtools';

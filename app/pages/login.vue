@@ -122,8 +122,10 @@ onMounted(async () => {
     }
     
     // If already authenticated, redirect to admin
+    // But only if user didn't come from a protected page (avoiding redirect loops)
     if (isAuthenticated.value) {
-        navigateTo('/admin')
+        const redirectTo = useRoute().query.redirect as string
+        navigateTo(redirectTo || '/admin')
     }
     
     isAuthChecking.value = false

@@ -8,14 +8,9 @@
 </template>
 
 <script setup lang="ts">
-const { initAuth, setupTokenRefresh } = useAuth()
+const { setupTokenRefresh } = useAuth()
 
-onMounted(async () => {
-  await initAuth()
+onMounted(() => {
   setupTokenRefresh()
 })
-
-if (process.client) {
-  await initAuth()
-}
 </script>
