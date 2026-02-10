@@ -1,4 +1,0 @@
-
-import { viteNodeFetch } from "file:///Users/arjunsk/Desktop/personal/Kimi_Agent_Nuxt%20ERP%20%E9%9C%80%E6%B1%82%E8%A1%A5%E5%85%A8/erp-office-rental/node_modules/@nuxt/vite-builder/dist/vite-node.mjs"
-export default () => viteNodeFetch.getManifest()
-    
