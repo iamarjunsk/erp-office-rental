@@ -18,21 +18,6 @@ declare module "nitropack/types" {
     '/api/companies': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/companies.get').default>>>>
     }
-    '/api/procurement/purchase-orders': {
-      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/procurement/purchase-orders.get').default>>>>
-    }
-    '/api/procurement/purchase-orders/:id': {
-      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/procurement/purchase-orders/[id].get').default>>>>
-    }
-    '/api/procurement/requisitions': {
-      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/procurement/requisitions.get').default>>>>
-    }
-    '/api/procurement/requisitions/:id': {
-      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/procurement/requisitions/[id].get').default>>>>
-    }
-    '/api/procurement/vendors': {
-      'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/procurement/vendors.get').default>>>>
-    }
     '/api/properties': {
       'get': Simplify<Serialize<Awaited<ReturnType<typeof import('../../server/api/properties.get').default>>>>
     }

@@ -51,52 +51,52 @@
         <!-- Summary Cards -->
         <div class="grid md:grid-cols-3 gap-4">
           <div class="bg-card border border-border rounded-xl p-4">
-            <div class="text-sm text-muted-foreground">Total Amount</div>
-            <div class="text-2xl font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</div>
-          </div>
-          <div class="bg-card border border-border rounded-xl p-4">
-            <div class="text-sm text-muted-foreground">Items</div>
-            <div class="text-2xl font-bold">{{ pr.items?.length || 0 }}</div>
-          </div>
-          <div class="bg-card border border-border rounded-xl p-4">
-            <div class="text-sm text-muted-foreground">Required By</div>
-            <div class="text-2xl font-bold">{{ formatDate(pr.requiredDate) }}</div>
-          </div>
+          <div class="text-sm text-muted-foreground">Total Amount</div>
+          <div class="text-2xl font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</div>
         </div>
+        <div class="bg-card border border-border rounded-xl p-4">
+          <div class="text-sm text-muted-foreground">Items</div>
+          <div class="text-2xl font-bold">{{ pr.items?.length || 0 }}</div>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-4">
+          <div class="text-sm text-muted-foreground">Required By</div>
+          <div class="text-2xl font-bold">{{ formatDate(pr.required_date) }}</div>
+        </div>
+      </div>
 
-        <!-- Line Items -->
-        <div class="bg-card border border-border rounded-xl overflow-hidden">
-          <div class="p-4 border-b border-border">
-            <h3 class="font-semibold">Line Items</h3>
-          </div>
-          <table class="w-full">
-            <thead class="bg-muted/50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Item</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Qty</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Unit Price</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border">
-              <tr v-for="item in pr.items" :key="item.id">
-                <td class="px-4 py-3">
-                  <div class="font-medium">{{ item.itemName }}</div>
-                  <div class="text-xs text-muted-foreground">{{ item.description }}</div>
-                </td>
-                <td class="px-4 py-3">{{ item.quantity }} {{ item.unit }}</td>
-                <td class="px-4 py-3">₹{{ item.estimatedUnitPrice?.toLocaleString() }}</td>
-                <td class="px-4 py-3 text-right font-medium">₹{{ item.totalEstimatedPrice?.toLocaleString() }}</td>
-              </tr>
-            </tbody>
-            <tfoot class="bg-muted/30">
-              <tr>
-                <td colspan="3" class="px-4 py-3 text-right font-medium">Total Estimated</td>
-                <td class="px-4 py-3 text-right text-lg font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</td>
-              </tr>
-            </tfoot>
-          </table>
+      <!-- Line Items -->
+      <div class="bg-card border border-border rounded-xl overflow-hidden">
+        <div class="p-4 border-b border-border">
+          <h3 class="font-semibold">Line Items</h3>
         </div>
+        <table class="w-full">
+          <thead class="bg-muted/50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Item</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Qty</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Unit Price</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr v-for="item in pr.items" :key="item.id">
+              <td class="px-4 py-3">
+                <div class="font-medium">{{ item.item_name }}</div>
+                <div class="text-xs text-muted-foreground">{{ item.description }}</div>
+              </td>
+              <td class="px-4 py-3">{{ item.quantity }} {{ item.unit }}</td>
+              <td class="px-4 py-3">₹{{ item.estimated_unit_price?.toLocaleString() }}</td>
+              <td class="px-4 py-3 text-right font-medium">₹{{ item.total_estimated_price?.toLocaleString() }}</td>
+            </tr>
+          </tbody>
+          <tfoot class="bg-muted/30">
+            <tr>
+              <td colspan="3" class="px-4 py-3 text-right font-medium">Total Estimated</td>
+              <td class="px-4 py-3 text-right text-lg font-bold">₹{{ pr.totalEstimatedAmount?.toLocaleString() }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
         <!-- Description -->
         <div class="bg-card border border-border rounded-xl p-6">
@@ -148,7 +148,7 @@
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Requested</span>
-              <span>{{ formatDate(pr.requestedAt) }}</span>
+              <span>{{ formatDate(pr.created_at) }}</span>
             </div>
           </div>
         </div>
@@ -176,19 +176,19 @@
         </div>
 
         <!-- Approver -->
-        <div v-if="pr.approver || pr.approverId" class="bg-card border border-border rounded-xl p-6">
+        <div v-if="pr.approvedBy || pr.approvedAt" class="bg-card border border-border rounded-xl p-6">
           <h3 class="font-semibold mb-4">Approval</h3>
           <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
               <Icon name="lucide:check" class="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <div class="font-medium">{{ pr.approver?.firstName }} {{ pr.approver?.lastName }}</div>
+              <div class="font-medium">{{ pr.approvedBy?.firstName }} {{ pr.approvedBy?.lastName }}</div>
               <div class="text-xs text-muted-foreground">{{ formatDateTime(pr.approvedAt) }}</div>
             </div>
           </div>
-          <div v-if="pr.approvalNotes" class="text-sm bg-muted/50 p-3 rounded-lg">
-            {{ pr.approvalNotes }}
+          <div v-if="pr.rejection_reason" class="text-sm bg-muted/50 p-3 rounded-lg">
+            {{ pr.rejection_reason }}
           </div>
         </div>
       </div>
@@ -203,7 +203,12 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { data: pr } = await useFetch(`/api/procurement/requisitions/${route.params.id}`)
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
+
+const { data: pr, refresh: refreshPR } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/`, {
+  headers: authHeaders(),
+})
 
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
@@ -241,22 +246,65 @@ const getHistoryIcon = (action: string) => {
   return icons[action] || 'lucide:circle'
 }
 
-const approveRequisition = () => {
-  console.log('Approving requisition...')
-  alert('Requisition approved! (Mock)')
+const approveRequisition = async () => {
+  try {
+    const { error } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/approve/`, {
+      method: 'POST',
+      headers: authHeaders()
+    })
+
+    if (error.value) {
+      console.error('Error approving requisition:', error.value)
+      return
+    }
+
+    await refreshPR()
+  } catch (err) {
+    console.error('Error approving requisition:', err)
+  }
 }
 
-const rejectRequisition = () => {
-  console.log('Rejecting requisition...')
-  alert('Requisition rejected! (Mock)')
+const rejectRequisition = async () => {
+  const reason = prompt('Enter rejection reason:')
+  if (reason === null) return
+
+  try {
+    const { error } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/reject/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: { reason }
+    })
+
+    if (error.value) {
+      console.error('Error rejecting requisition:', error.value)
+      return
+    }
+
+    await refreshPR()
+  } catch (err) {
+    console.error('Error rejecting requisition:', err)
+  }
 }
 
 const convertToPO = () => {
   navigateTo(`/admin/procurement/purchase-orders/create?prId=${route.params.id}`)
 }
 
-const submitForApproval = () => {
-  console.log('Submitting for approval...')
-  alert('Requisition submitted for approval! (Mock)')
+const submitForApproval = async () => {
+  try {
+    const { error } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/submit/`, {
+      method: 'POST',
+      headers: authHeaders()
+    })
+
+    if (error.value) {
+      console.error('Error submitting requisition:', error.value)
+      return
+    }
+
+    await refreshPR()
+  } catch (err) {
+    console.error('Error submitting requisition:', err)
+  }
 }
 </script>

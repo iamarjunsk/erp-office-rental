@@ -24,12 +24,14 @@
           <Icon name="lucide:download" class="w-4 h-4" />
           Download PDF
         </button>
-        <button 
+        <button
           v-if="po.status === 'draft'"
-          class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+          @click="sendToVendor"
+          :disabled="sending"
+          class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
         >
           <Icon name="lucide:send" class="w-4 h-4" />
-          Send to Vendor
+          {{ sending ? 'Sending...' : 'Send to Vendor' }}
         </button>
         <button 
           v-if="['sent', 'acknowledged', 'partially_received'].includes(po.status)"
@@ -52,83 +54,83 @@
             <div class="text-xl font-bold">₹{{ po.subtotal?.toLocaleString() }}</div>
           </div>
           <div class="bg-card border border-border rounded-xl p-4">
-            <div class="text-sm text-muted-foreground">Tax ({{ po.taxRate }}%)</div>
-            <div class="text-xl font-bold">₹{{ po.taxAmount?.toLocaleString() }}</div>
-          </div>
-          <div class="bg-card border border-border rounded-xl p-4">
-            <div class="text-sm text-muted-foreground">Shipping</div>
-            <div class="text-xl font-bold">₹{{ po.shippingCost?.toLocaleString() }}</div>
-          </div>
-          <div class="bg-card border border-border rounded-xl p-4 bg-primary/5">
-            <div class="text-sm text-muted-foreground">Total</div>
-            <div class="text-xl font-bold text-primary">₹{{ po.totalAmount?.toLocaleString() }}</div>
-          </div>
+          <div class="text-sm text-muted-foreground">Tax ({{ po.tax_rate }}%)</div>
+          <div class="text-xl font-bold">₹{{ po.tax_amount?.toLocaleString() }}</div>
         </div>
+        <div class="bg-card border border-border rounded-xl p-4">
+          <div class="text-sm text-muted-foreground">Shipping</div>
+          <div class="text-xl font-bold">₹{{ po.shipping_cost?.toLocaleString() }}</div>
+        </div>
+        <div class="bg-card border border-border rounded-xl p-4 bg-primary/5">
+          <div class="text-sm text-muted-foreground">Total</div>
+          <div class="text-xl font-bold text-primary">₹{{ po.total_amount?.toLocaleString() }}</div>
+        </div>
+      </div>
 
-        <!-- Line Items -->
-        <div class="bg-card border border-border rounded-xl overflow-hidden">
-          <div class="p-4 border-b border-border">
-            <h3 class="font-semibold">Order Items</h3>
-          </div>
-          <table class="w-full">
-            <thead class="bg-muted/50">
-              <tr>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Item</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Ordered</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Received</th>
-                <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Unit Price</th>
-                <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border">
-              <tr v-for="item in po.items" :key="item.id">
-                <td class="px-4 py-3">
-                  <div class="font-medium">{{ item.itemName }}</div>
-                  <div class="text-xs text-muted-foreground">{{ item.description }}</div>
-                </td>
-                <td class="px-4 py-3">{{ item.quantity }} {{ item.unit }}</td>
-                <td class="px-4 py-3">
-                  <div class="flex items-center gap-2">
-                    <span 
-                      :class="item.receivedQuantity === item.quantity ? 'text-green-600' : item.receivedQuantity > 0 ? 'text-amber-600' : 'text-gray-500'"
-                    >
-                      {{ item.receivedQuantity || 0 }}
-                    </span>
-                    <div v-if="item.receivedQuantity !== item.quantity" class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-[60px]">
-                      <div 
-                        class="h-1.5 rounded-full"
-                        :class="item.receivedQuantity > 0 ? 'bg-amber-500' : 'bg-gray-300'"
-                        :style="{ width: `${(item.receivedQuantity / item.quantity) * 100}%` }"
-                      ></div>
-                    </div>
-                    <Icon v-if="item.receivedQuantity === item.quantity" name="lucide:check-circle" class="w-4 h-4 text-green-600" />
+      <!-- Line Items -->
+      <div class="bg-card border border-border rounded-xl overflow-hidden">
+        <div class="p-4 border-b border-border">
+          <h3 class="font-semibold">Order Items</h3>
+        </div>
+        <table class="w-full">
+          <thead class="bg-muted/50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Item</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Ordered</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Received</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Unit Price</th>
+              <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <tr v-for="item in po.items" :key="item.id">
+              <td class="px-4 py-3">
+                <div class="font-medium">{{ item.item_name }}</div>
+                <div class="text-xs text-muted-foreground">{{ item.description }}</div>
+              </td>
+              <td class="px-4 py-3">{{ item.quantity }} {{ item.unit }}</td>
+              <td class="px-4 py-3">
+                <div class="flex items-center gap-2">
+                  <span
+                    :class="item.received_quantity === item.quantity ? 'text-green-600' : item.received_quantity > 0 ? 'text-amber-600' : 'text-gray-500'"
+                  >
+                    {{ item.received_quantity || 0 }}
+                  </span>
+                  <div v-if="item.received_quantity !== item.quantity" class="flex-1 bg-gray-200 rounded-full h-1.5 max-w-[60px]">
+                    <div
+                      class="h-1.5 rounded-full"
+                      :class="item.received_quantity > 0 ? 'bg-amber-500' : 'bg-gray-300'"
+                      :style="{ width: `${(item.received_quantity / item.quantity) * 100}%` }"
+                    ></div>
                   </div>
-                </td>
-                <td class="px-4 py-3">₹{{ item.unitPrice?.toLocaleString() }}</td>
-                <td class="px-4 py-3 text-right font-medium">₹{{ item.totalPrice?.toLocaleString() }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <Icon v-if="item.received_quantity === item.quantity" name="lucide:check-circle" class="w-4 h-4 text-green-600" />
+                </div>
+              </td>
+              <td class="px-4 py-3">₹{{ item.unit_price?.toLocaleString() }}</td>
+              <td class="px-4 py-3 text-right font-medium">₹{{ item.total_price?.toLocaleString() }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-        <!-- Delivery Info -->
-        <div class="bg-card border border-border rounded-xl p-6">
-          <h3 class="font-semibold mb-4">Delivery Information</h3>
-          <div class="grid md:grid-cols-2 gap-6">
-            <div>
-              <div class="text-sm text-muted-foreground mb-1">Delivery Date</div>
-              <div class="font-medium">{{ formatDate(po.deliveryDate) }}</div>
-            </div>
-            <div>
-              <div class="text-sm text-muted-foreground mb-1">Delivery Location</div>
-              <div class="font-medium">{{ po.deliveryLocation }}</div>
-            </div>
-            <div class="md:col-span-2" v-if="po.deliveryInstructions">
-              <div class="text-sm text-muted-foreground mb-1">Special Instructions</div>
-              <div class="text-sm">{{ po.deliveryInstructions }}</div>
-            </div>
+      <!-- Delivery Info -->
+      <div class="bg-card border border-border rounded-xl p-6">
+        <h3 class="font-semibold mb-4">Delivery Information</h3>
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <div class="text-sm text-muted-foreground mb-1">Delivery Date</div>
+            <div class="font-medium">{{ formatDate(po.delivery_date) }}</div>
+          </div>
+          <div>
+            <div class="text-sm text-muted-foreground mb-1">Delivery Location</div>
+            <div class="font-medium">{{ po.delivery_location }}</div>
+          </div>
+          <div class="md:col-span-2" v-if="po.delivery_instructions">
+            <div class="text-sm text-muted-foreground mb-1">Special Instructions</div>
+            <div class="text-sm">{{ po.delivery_instructions }}</div>
           </div>
         </div>
+      </div>
 
         <!-- History -->
         <div class="bg-card border border-border rounded-xl p-6">
@@ -204,11 +206,11 @@
         <!-- Related PR -->
         <div v-if="po.pr" class="bg-card border border-border rounded-xl p-6">
           <h3 class="font-semibold mb-4">Related Requisition</h3>
-          <NuxtLink 
+          <NuxtLink
             :to="`/admin/procurement/requisitions/${po.prId}`"
             class="block p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
           >
-            <div class="font-medium text-primary">{{ po.pr.prNumber }}</div>
+            <div class="font-medium text-primary">{{ po.pr.pr_number }}</div>
             <div class="text-sm text-muted-foreground">{{ po.pr.title }}</div>
           </NuxtLink>
         </div>
@@ -314,9 +316,15 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { data: po } = await useFetch(`/api/procurement/purchase-orders/${route.params.id}`)
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
+
+const { data: po, refresh: refreshPO } = await useFetch(`${API_BASE}/purchase-orders/${route.params.id}/`, {
+  headers: authHeaders(),
+})
 
 const showReceiptModal = ref(false)
+const sending = ref(false)
 
 const getStatusClass = (status: string) => {
   const classes: Record<string, string> = {
@@ -356,17 +364,57 @@ const receiptForm = ref({
 watch(showReceiptModal, (isOpen) => {
   if (isOpen && po.value?.items) {
     receiptForm.value.items = po.value.items.map((item: any) => ({
-      itemName: item.itemName,
+      itemName: item.item_name,
       orderedQty: item.quantity,
-      previouslyReceived: item.receivedQuantity || 0,
+      previouslyReceived: item.received_quantity || 0,
       receiveNow: 0
     }))
   }
 })
 
-const submitReceipt = () => {
-  console.log('Recording receipt:', receiptForm.value)
-  showReceiptModal.value = false
-  alert('Receipt recorded successfully! (Mock)')
+const submitReceipt = async () => {
+  try {
+    const items = receiptForm.value.items
+      .filter(item => item.receiveNow > 0)
+      .map(item => ({
+        itemId: po.value?.items.find((i: any) => i.item_name === item.itemName)?.id,
+        receivedQuantity: item.previouslyReceived + item.receiveNow
+      }))
+
+    const { error } = await useFetch(`${API_BASE}/purchase-orders/${route.params.id}/receive/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: { items }
+    })
+
+    if (error.value) {
+      console.error('Error recording receipt:', error.value)
+      return
+    }
+
+    showReceiptModal.value = false
+    await refreshPO()
+  } catch (err) {
+    console.error('Error recording receipt:', err)
+  }
+}
+
+const sendToVendor = async () => {
+  sending.value = true
+  try {
+    const { error } = await useFetch(`${API_BASE}/purchase-orders/${route.params.id}/send/`, {
+      method: 'POST',
+      headers: authHeaders()
+    })
+
+    if (error.value) {
+      console.error('Error sending PO:', error.value)
+      return
+    }
+
+    await refreshPO()
+  } finally {
+    sending.value = false
+  }
 }
 </script>

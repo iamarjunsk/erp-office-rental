@@ -1,67 +1,16 @@
-export default defineEventHandler((event) => {
-    return {
-        data: [
-            {
-                id: 1,
-                code: "PROP-001",
-                name: "Cyber Towers",
-                type: "commercial",
-                city: "Hyderabad",
-                state: "Telangana",
-                totalArea: 50000,
-                status: "active",
-                manager: { firstName: "John", lastName: "Doe" },
-            },
-            {
-                id: 2,
-                code: "PROP-002",
-                name: "Tech Park Plaza",
-                type: "coworking",
-                city: "Bangalore",
-                state: "Karnataka",
-                totalArea: 75000,
-                status: "active",
-                manager: { firstName: "Jane", lastName: "Smith" },
-            },
-            {
-                id: 3,
-                code: "PROP-003",
-                name: "Innovation Hub",
-                type: "mixed_use",
-                city: "Mumbai",
-                state: "Maharashtra",
-                totalArea: 120000,
-                status: "under_renovation",
-                manager: { firstName: "Robert", lastName: "Brown" },
-            },
-            {
-                id: 4,
-                code: "PROP-004",
-                name: "Downtown Heights",
-                type: "commercial",
-                city: "New Delhi",
-                state: "Delhi",
-                totalArea: 45000,
-                status: "active",
-                manager: null,
-            },
-            {
-                id: 5,
-                code: "PROP-005",
-                name: "Seaside Complex",
-                type: "commercial",
-                city: "Chennai",
-                state: "Tamil Nadu",
-                totalArea: 60000,
-                status: "inactive",
-                manager: { firstName: "Emily", lastName: "Davis" },
-            },
-        ],
-        pagination: {
-            page: 1,
-            limit: 20,
-            total: 5,
-            totalPages: 1,
-        },
-    };
+export default defineEventHandler(async (event) => {
+    const backendUrl = 'http://localhost:8000'
+
+    try {
+        const response = await fetch(`${backendUrl}/api/properties/`)
+        if (!response.ok) throw new Error('Failed to fetch')
+        const data = await response.json()
+        return {
+            data: data.results || data,
+        }
+    } catch (error) {
+        return {
+            data: [],
+        }
+    }
 });

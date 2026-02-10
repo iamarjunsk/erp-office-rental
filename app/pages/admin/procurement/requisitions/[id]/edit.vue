@@ -28,6 +28,15 @@
               />
             </div>
             <div class="space-y-2">
+              <label class="text-sm font-medium">Department *</label>
+              <input 
+                v-model="form.department"
+                type="text"
+                class="w-full px-4 py-2 bg-background border border-border rounded-lg"
+                required
+              />
+            </div>
+            <div class="space-y-2">
               <label class="text-sm font-medium">Category *</label>
               <select v-model="form.category" class="w-full px-4 py-2 bg-background border border-border rounded-lg" required>
                 <option value="furniture">Furniture</option>
@@ -192,11 +201,16 @@ definePageMeta({
 
 const route = useRoute()
 const router = useRouter()
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
 
-const { data: requisition } = await useFetch(`/api/procurement/requisitions/${route.params.id}`)
+const { data: requisition } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/`, {
+  headers: authHeaders(),
+})
 
 const form = ref({
   title: '',
+  department: '',
   category: '',
   priority: 'medium',
   propertyId: '',
@@ -213,17 +227,18 @@ watchEffect(() => {
     const r = requisition.value as any
     form.value = {
       title: r.title || '',
+      department: r.department || '',
       category: r.category || '',
       priority: r.priority || 'medium',
-      propertyId: r.propertyId?.toString() || '',
-      requiredDate: r.requiredDate || '',
+      propertyId: r.propertyId?.toString() || r.property?.id?.toString() || '',
+      requiredDate: r.required_date || '',
       description: r.description || '',
       items: r.items?.map((item: any) => ({
-        itemName: item.itemName,
+        itemName: item.item_name,
         quantity: item.quantity,
         unit: item.unit,
-        estimatedUnitPrice: item.estimatedUnitPrice,
-        totalEstimatedPrice: item.totalEstimatedPrice
+        estimatedUnitPrice: item.estimated_unit_price,
+        totalEstimatedPrice: item.total_estimated_price
       })) || [{ itemName: '', quantity: 1, unit: 'pcs', estimatedUnitPrice: 0, totalEstimatedPrice: 0 }]
     }
   }
@@ -246,9 +261,39 @@ const calculateItemTotal = (index: number) => {
   item.totalEstimatedPrice = item.quantity * item.estimatedUnitPrice
 }
 
-const submitForm = () => {
-  console.log('Updating requisition:', form.value)
-  alert('Requisition updated successfully! (Mock)')
-  router.push(`/admin/procurement/requisitions/${route.params.id}`)
+const submitForm = async () => {
+  try {
+    const payload = {
+      title: form.value.title,
+      department: form.value.department,
+      category: form.value.category,
+      priority: form.value.priority,
+      property_ref: parseInt(form.value.propertyId) || null,
+      required_date: form.value.requiredDate,
+      description: form.value.description,
+      items: form.value.items.map(item => ({
+        item_name: item.itemName,
+        description: '',
+        quantity: item.quantity,
+        unit: item.unit,
+        estimated_unit_price: item.estimatedUnitPrice
+      }))
+    }
+
+    const { error } = await useFetch(`${API_BASE}/requisitions/${route.params.id}/`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: payload
+    })
+
+    if (error.value) {
+      console.error('Error updating requisition:', error.value)
+      return
+    }
+
+    router.push(`/admin/procurement/requisitions/${route.params.id}`)
+  } catch (err) {
+    console.error('Error updating requisition:', err)
+  }
 }
 </script>

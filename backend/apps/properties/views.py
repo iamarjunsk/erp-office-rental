@@ -8,7 +8,7 @@ class PropertyViewSet(viewsets.ModelViewSet):
     """
     queryset = Property.objects.all().order_by('-created_at')
     serializer_class = PropertySerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['name', 'code', 'city', 'state']
     ordering_fields = ['name', 'created_at', 'total_area']

@@ -176,18 +176,27 @@ definePageMeta({
   middleware: ['auth'],
 })
 
-const { data: prData } = await useFetch('/api/procurement/requisitions')
-const { data: poData } = await useFetch('/api/procurement/purchase-orders')
-const { data: vendorData } = await useFetch('/api/procurement/vendors')
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
+
+const { data: prData } = await useFetch(`${API_BASE}/requisitions/`, {
+  headers: authHeaders(),
+})
+const { data: poData } = await useFetch(`${API_BASE}/purchase-orders/`, {
+  headers: authHeaders(),
+})
+const { data: vendorData } = await useFetch(`${API_BASE}/vendors/`, {
+  headers: authHeaders(),
+})
 
 const prStats = computed(() => prData.value?.stats || { total: 0, pending_approval: 0 })
 const poStats = computed(() => poData.value?.stats || { total: 0, sent: 0, totalValue: 0 })
 const vendorStats = computed(() => vendorData.value?.stats || { active: 0 })
 
 const pendingRequisitions = computed(() => 
-  (prData.value?.data || []).filter((pr: any) => pr.status === 'pending_approval').slice(0, 3)
+  (prData.value?.results || []).filter((pr: any) => pr.status === 'pending_approval').slice(0, 3)
 )
-const recentPOs = computed(() => (poData.value?.data || []).slice(0, 4))
+const recentPOs = computed(() => (poData.value?.results || []).slice(0, 4))
 
 const getStatusIcon = (status: string) => {
   const icons: Record<string, string> = {

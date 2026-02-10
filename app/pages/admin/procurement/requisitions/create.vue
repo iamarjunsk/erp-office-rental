@@ -26,6 +26,16 @@
             />
           </div>
           <div class="space-y-2">
+            <label class="text-sm font-medium">Department *</label>
+            <input 
+              v-model="form.department"
+              type="text"
+              placeholder="e.g., IT, HR, Admin"
+              class="w-full px-4 py-2 bg-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+          <div class="space-y-2">
             <label class="text-sm font-medium">Category *</label>
             <select 
               v-model="form.category"
@@ -33,12 +43,9 @@
               required
             >
               <option value="">Select category</option>
-              <option value="office_supplies">Office Supplies</option>
-              <option value="equipment">Equipment</option>
-              <option value="furniture">Furniture</option>
-              <option value="it_hardware">IT Hardware</option>
-              <option value="services">Services</option>
-              <option value="maintenance">Maintenance</option>
+              <option v-for="cat in categories" :key="cat.value" :value="cat.value">
+                {{ cat.label }}
+              </option>
             </select>
           </div>
           <div class="space-y-2">
@@ -216,13 +223,22 @@ definePageMeta({
   middleware: ['auth'],
 })
 
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
+
 const { data: propertyData } = await useFetch('/api/properties')
+const { data: categoryData } = await useFetch(`${API_BASE}/categories/`, {
+  headers: authHeaders(),
+})
+
 const properties = computed(() => propertyData.value?.data || [])
+const categories = computed(() => categoryData.value?.results || [])
 
 const saving = ref(false)
 
 const form = ref({
   title: '',
+  department: 'General',
   category: '',
   priority: 'medium',
   propertyId: '',
@@ -252,11 +268,37 @@ const calculateItemTotal = (index: number) => {
   item.totalEstimatedPrice = (item.quantity || 0) * (item.estimatedUnitPrice || 0)
 }
 
+const createRequisitionPayload = () => ({
+  title: form.value.title,
+  description: form.value.description,
+  department: form.value.department,
+  property_ref: parseInt(form.value.propertyId) || null,
+  priority: form.value.priority,
+  category: form.value.category,
+  required_date: form.value.requiredDate,
+  items: form.value.items.map(item => ({
+    item_name: item.itemName,
+    description: '',
+    quantity: item.quantity,
+    unit: item.unit,
+    estimated_unit_price: item.estimatedUnitPrice
+  }))
+})
+
 const saveAsDraft = async () => {
   saving.value = true
   try {
-    console.log('Saving as draft:', { ...form.value, status: 'draft', totalEstimatedAmount: totalAmount.value })
-    await new Promise(r => setTimeout(r, 1000))
+    const { data, error } = await useFetch(`${API_BASE}/requisitions/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: createRequisitionPayload()
+    })
+
+    if (error.value) {
+      console.error('Error saving draft:', error.value)
+      return
+    }
+
     navigateTo('/admin/procurement/requisitions')
   } finally {
     saving.value = false
@@ -266,8 +308,31 @@ const saveAsDraft = async () => {
 const submitRequisition = async () => {
   saving.value = true
   try {
-    console.log('Submitting:', { ...form.value, status: 'pending_approval', totalEstimatedAmount: totalAmount.value })
-    await new Promise(r => setTimeout(r, 1000))
+    // Create the requisition first
+    const { data, error } = await useFetch(`${API_BASE}/requisitions/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: createRequisitionPayload()
+    })
+
+    if (error.value) {
+      console.error('Error creating requisition:', error.value)
+      return
+    }
+
+    // Then submit it for approval
+    if (data.value?.id) {
+      const { error: submitError } = await useFetch(`${API_BASE}/requisitions/${data.value.id}/submit/`, {
+        method: 'POST',
+        headers: authHeaders()
+      })
+
+      if (submitError.value) {
+        console.error('Error submitting requisition:', submitError.value)
+        return
+      }
+    }
+
     navigateTo('/admin/procurement/requisitions')
   } finally {
     saving.value = false

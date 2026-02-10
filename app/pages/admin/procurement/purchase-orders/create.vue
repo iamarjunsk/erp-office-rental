@@ -295,31 +295,47 @@ definePageMeta({
 
 const route = useRoute()
 const fromPR = computed(() => !!route.query.prId)
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
 
-const { data: vendorData } = await useFetch('/api/procurement/vendors')
+const { data: vendorData } = await useFetch(`${API_BASE}/vendors/`, {
+  headers: authHeaders(),
+})
 const { data: propertyData } = await useFetch('/api/properties')
 
 const prData = ref<any>(null)
 if (fromPR.value) {
-  const { data } = await useFetch(`/api/procurement/requisitions/${route.query.prId}`)
+  const { data } = await useFetch(`${API_BASE}/requisitions/${route.query.prId}/convert_to_po/`, {
+    headers: authHeaders(),
+  })
   prData.value = data.value
-  
+
   // Pre-populate form from PR
   if (prData.value) {
     setTimeout(() => {
       form.value.title = `PO for ${prData.value.title}`
       form.value.propertyId = prData.value.propertyId
+      form.value.expectedDeliveryDate = prData.value.required_date
       form.value.items = prData.value.items?.map((item: any) => ({
-        itemName: item.itemName,
+        itemName: item.item_name,
+        description: item.description,
         quantity: item.quantity,
         unit: item.unit || 'pcs',
-        unitPrice: item.estimatedUnitPrice || 0
+        unitPrice: parseFloat(item.estimated_unit_price) || 0
       })) || form.value.items
     }, 0)
   }
 }
 
-const vendors = computed(() => vendorData.value?.data || [])
+// Pre-populate vendor if passed in query
+const fromVendor = computed(() => !!route.query.vendorId)
+if (fromVendor.value) {
+  setTimeout(() => {
+    form.value.vendorId = route.query.vendorId as string
+  }, 100)
+}
+
+const vendors = computed(() => vendorData.value?.results || vendorData.value || [])
 const properties = computed(() => propertyData.value?.data || [])
 
 const saving = ref(false)
@@ -366,15 +382,45 @@ const totalAmount = computed(() =>
 const submitOrder = async () => {
   saving.value = true
   try {
-    console.log('Creating PO:', { 
-      ...form.value, 
-      status: 'sent',
-      subtotal: subtotal.value,
-      taxAmount: taxAmount.value,
-      totalAmount: totalAmount.value,
-      prId: route.query.prId 
+    const payload = {
+      pr: route.query.prId ? parseInt(route.query.prId as string) : null,
+      vendor: parseInt(form.value.vendorId),
+      title: form.value.title,
+      terms: form.value.paymentTerms,
+      delivery_date: form.value.expectedDeliveryDate,
+      delivery_location: properties.value.find((p: any) => p.id === parseInt(form.value.propertyId))?.name || 'Door Delivery',
+      tax_rate: form.value.taxRate,
+      shipping_cost: form.value.shippingCost,
+      discount: 0,
+      notes: form.value.specialInstructions,
+      items: form.value.items.map(item => ({
+        item_name: item.itemName,
+        description: '',
+        quantity: item.quantity,
+        unit: item.unit,
+        unit_price: item.unitPrice
+      }))
+    }
+
+    const { data, error } = await useFetch(`${API_BASE}/purchase-orders/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: payload
     })
-    await new Promise(r => setTimeout(r, 1000))
+
+    if (error.value) {
+      console.error('Error creating PO:', error.value)
+      return
+    }
+
+    // Send the PO if created successfully
+    if (data.value?.id) {
+      await useFetch(`${API_BASE}/purchase-orders/${data.value.id}/send/`, {
+        method: 'POST',
+        headers: authHeaders()
+      })
+    }
+
     navigateTo('/admin/procurement/purchase-orders')
   } finally {
     saving.value = false
@@ -384,8 +430,37 @@ const submitOrder = async () => {
 const saveAsDraft = async () => {
   saving.value = true
   try {
-    console.log('Saving PO as draft:', { ...form.value, status: 'draft' })
-    await new Promise(r => setTimeout(r, 500))
+    const payload = {
+      pr: route.query.prId ? parseInt(route.query.prId as string) : null,
+      vendor: parseInt(form.value.vendorId),
+      title: form.value.title,
+      terms: form.value.paymentTerms,
+      delivery_date: form.value.expectedDeliveryDate,
+      delivery_location: properties.value.find((p: any) => p.id === parseInt(form.value.propertyId))?.name || 'Door Delivery',
+      tax_rate: form.value.taxRate,
+      shipping_cost: form.value.shippingCost,
+      discount: 0,
+      notes: form.value.specialInstructions,
+      items: form.value.items.map(item => ({
+        item_name: item.itemName,
+        description: '',
+        quantity: item.quantity,
+        unit: item.unit,
+        unit_price: item.unitPrice
+      }))
+    }
+
+    const { error } = await useFetch(`${API_BASE}/purchase-orders/`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: payload
+    })
+
+    if (error.value) {
+      console.error('Error saving PO draft:', error.value)
+      return
+    }
+
     navigateTo('/admin/procurement/purchase-orders')
   } finally {
     saving.value = false

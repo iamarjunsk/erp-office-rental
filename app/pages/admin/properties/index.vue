@@ -177,9 +177,15 @@ const { data, pending: loading, refresh } = await useFetch(() => {
   refresh()
 }, 500))
 
-// Handle DRF pagination structure
-const properties = computed(() => data.value?.results || [])
-const totalCount = computed(() => data.value?.count || 0)
+// Handle DRF pagination structure - API returns plain array
+const properties = computed(() => {
+  const results = data.value?.results || data.value || []
+  return Array.isArray(results) ? results : []
+})
+const totalCount = computed(() => {
+  const count = data.value?.count || data.value?.length || 0
+  return Array.isArray(data.value) ? data.value.length : count
+})
 
 const pagination = computed(() => ({
   start: (page.value - 1) * limit + 1,

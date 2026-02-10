@@ -121,11 +121,19 @@ definePageMeta({
   middleware: ['auth'],
 })
 
-const { data } = await useFetch('/api/procurement/purchase-orders')
+const { authHeaders } = useAuth()
+const API_BASE = 'http://localhost:8000/api/procurement'
+
+const { data: ordersData } = await useFetch(`${API_BASE}/purchase-orders/`, {
+  headers: authHeaders(),
+})
+const { data: statsData } = await useFetch(`${API_BASE}/purchase-orders/stats/`, {
+  headers: authHeaders(),
+})
 
 const statusFilter = ref('')
-const orders = computed(() => data.value?.data || [])
-const stats = computed(() => data.value?.stats || {})
+const orders = computed(() => ordersData.value?.results || ordersData.value || [])
+const stats = computed(() => statsData.value || {})
 
 const statusStats = computed(() => [
   { key: 'draft', label: 'Draft', count: stats.value.draft || 0, color: 'text-gray-600' },
