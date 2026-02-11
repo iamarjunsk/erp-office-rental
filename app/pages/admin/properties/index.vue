@@ -83,18 +83,37 @@
               </td>
               <td class="px-4 py-3 text-sm">
                 <div class="flex items-center gap-2">
-                  <button 
-                    @click="viewProperty(property)"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                  >
-                    <Icon name="lucide:eye" class="w-4 h-4" />
-                  </button>
-                  <button 
-                    @click="editProperty(property)"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                  >
-                    <Icon name="lucide:pencil" class="w-4 h-4" />
-                  </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="View property details"
+                          @click="viewProperty(property)"
+                        >
+                          <Eye class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>View Property</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Edit property"
+                          @click="editProperty(property)"
+                        >
+                          <Pencil class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit Property</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </td>
             </tr>
@@ -135,6 +154,15 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '~/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+import { Eye, Pencil } from 'lucide-vue-next'
+
 // Simple debounce implementation since lodash-es is not available
 const debounce = (fn: Function, delay: number) => {
   let timeoutId: any
