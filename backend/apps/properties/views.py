@@ -6,7 +6,8 @@ class PropertyViewSet(viewsets.ModelViewSet):
     """
     API endpoint that allows properties to be viewed or edited.
     """
-    queryset = Property.objects.all().order_by('-created_at')
+    # Optimized to avoid N+1 queries when fetching manager details
+    queryset = Property.objects.select_related('manager').all().order_by('-created_at')
     serializer_class = PropertySerializer
     permission_classes = [permissions.AllowAny]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
