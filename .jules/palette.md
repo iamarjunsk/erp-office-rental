@@ -1,1 +1,2 @@
 ## 2024-02-12 - Property List Actions | Learning: Generic icon-only buttons hinder accessibility and clarity. | Action: Replaced with shadcn Button and Tooltip components.
+## 2024-02-12 - Property List Actions | Learning: Direct imports from lucide-vue-next can fail if dependencies are not perfectly aligned; using globally registered Nuxt Icon component is safer. | Action: Reverted to using <Icon> inside shadcn Button.

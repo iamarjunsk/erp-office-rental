@@ -92,7 +92,7 @@
                           aria-label="View property details"
                           @click="viewProperty(property)"
                         >
-                          <Eye class="w-4 h-4" />
+                          <Icon name="lucide:eye" class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>View Property</TooltipContent>
@@ -108,7 +108,7 @@
                           aria-label="Edit property"
                           @click="editProperty(property)"
                         >
-                          <Pencil class="w-4 h-4" />
+                          <Icon name="lucide:pencil" class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Edit Property</TooltipContent>
@@ -161,7 +161,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
-import { Eye, Pencil } from 'lucide-vue-next'
 
 // Simple debounce implementation since lodash-es is not available
 const debounce = (fn: Function, delay: number) => {
