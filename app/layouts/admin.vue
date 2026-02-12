@@ -36,9 +36,18 @@
             <p class="text-sm font-semibold text-slate-900 truncate">{{ user?.first_name || 'User' }} {{ user?.last_name || '' }}</p>
             <p class="text-xs text-slate-500 truncate group-hover:text-slate-700">{{ user?.email || 'Not logged in' }}</p>
           </div>
-          <button @click="logout" title="Logout" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-            <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <button @click="logout" aria-label="Logout" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                  <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Logout</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </aside>
@@ -62,6 +71,13 @@
 </template>
 
 <script setup lang="ts">
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '~/components/ui/tooltip'
+
 const { user, logout } = useAuth()
 const route = useRoute()
 
