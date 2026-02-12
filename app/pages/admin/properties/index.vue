@@ -89,13 +89,14 @@
                         <Button
                           variant="ghost"
                           size="icon"
+                          class="text-muted-foreground hover:text-foreground"
                           aria-label="View property details"
                           @click="viewProperty(property)"
                         >
                           <Icon name="lucide:eye" class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>View Property</TooltipContent>
+                      <TooltipContent>View property details</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
 
@@ -105,13 +106,14 @@
                         <Button
                           variant="ghost"
                           size="icon"
+                          class="text-muted-foreground hover:text-foreground"
                           aria-label="Edit property"
                           @click="editProperty(property)"
                         >
                           <Icon name="lucide:pencil" class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>Edit Property</TooltipContent>
+                      <TooltipContent>Edit property</TooltipContent>
                     </Tooltip>
                   </TooltipProvider>
                 </div>
