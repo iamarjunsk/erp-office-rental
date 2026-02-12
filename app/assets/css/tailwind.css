@@ -111,18 +111,18 @@
     }
 }
 
-[data-state='open'][data-swipe='move'] {
+.toast-root[data-state='open'][data-swipe='move'] {
     transform: translateX(var(--radix-toast-swipe-move-x));
 }
 
-[data-state='open'][data-swipe='end'] {
+.toast-root[data-state='open'][data-swipe='end'] {
     animation: slideOutToRight 0.3s ease-out forwards;
 }
 
-[data-state='closed'] {
+.toast-root[data-state='closed'] {
     animation: fadeOut 0.2s ease-out forwards;
 }
 
-[data-state='open'] {
+.toast-root[data-state='open'] {
     animation: fadeIn 0.2s ease-out forwards;
 }

@@ -1,0 +1,1 @@
+## 2026-02-12 - Global CSS Selectors Causing Invisible Elements | Learning: Generic selectors like `[data-state='closed']` in global CSS can unintentionally target unrelated components (e.g., Tooltip triggers), causing visibility issues via animations meant for Toasts. | Action: Scoped global animations to specific component classes (e.g., `.toast-root`) to prevent side effects.

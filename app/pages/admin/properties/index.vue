@@ -10,7 +10,7 @@
         to="/admin/properties/create"
         class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
       >
-        <Icon name="lucide:plus" class="w-4 h-4" />
+        <Plus class="w-4 h-4" />
         Add Property
       </NuxtLink>
     </div>
@@ -18,7 +18,7 @@
     <!-- Filters -->
     <div class="flex flex-col sm:flex-row gap-4">
       <div class="relative flex-1">
-        <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
         <input
           v-model="searchQuery"
           type="text"
@@ -93,7 +93,7 @@
                           aria-label="View property details"
                           @click="viewProperty(property)"
                         >
-                          <Icon name="lucide:eye" class="w-4 h-4" />
+                          <Eye class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>View property details</TooltipContent>
@@ -110,7 +110,7 @@
                           aria-label="Edit property"
                           @click="editProperty(property)"
                         >
-                          <Icon name="lucide:pencil" class="w-4 h-4" />
+                          <Pencil class="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Edit property</TooltipContent>
@@ -156,6 +156,7 @@
 </template>
 
 <script setup lang="ts">
+import { Eye, Pencil, Plus, Search } from 'lucide-vue-next'
 import { Button } from '~/components/ui/button'
 import {
   Tooltip,
