@@ -1,0 +1,1 @@
+## 2024-02-14 - [Shadcn-Vue Nuxt Integration] | Learning: Nuxt component scanning can conflict with shadcn-vue's `index.ts` exports, causing duplicate component warnings. | Action: Use `.nuxtignore` to exclude `components/ui/**/index.ts` files when using shadcn-vue in a Nuxt project.
