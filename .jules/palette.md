@@ -1,0 +1,1 @@
+## 2025-05-15 - Nuxt Component Duplication | Learning: Nuxt recursively scans all components, causing duplicate component warnings when using shadcn-vue's folder structure (Component.vue + index.ts). | Action: Add `app/components/ui/**/index.ts` to `.nuxtignore` to silence warnings while preserving functionality.
