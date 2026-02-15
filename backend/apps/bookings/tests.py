@@ -1,10 +1,14 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
+from rest_framework.test import APIClient, APITestCase
+from rest_framework import status
 from django.utils import timezone
+from django.urls import reverse
 from apps.properties.models import Property
 from apps.spaces.models import Space
+from apps.companies.models import Company
 from .models import Booking
+import datetime
 
 User = get_user_model()
 
@@ -45,3 +49,72 @@ class BookingTests(TestCase):
         response = self.client.get('/api/bookings/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+class BookingPerformanceTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            email='perfuser@example.com',
+            password='password123',
+            first_name='Perf',
+            last_name='User'
+        )
+        self.client.force_authenticate(user=self.user)
+
+        # Create companies
+        self.companies = []
+        for i in range(5):
+            self.companies.append(Company.objects.create(
+                name=f'Company {i}',
+                email=f'company{i}@example.com'
+            ))
+
+        # Create properties
+        self.properties = []
+        for i in range(5):
+            self.properties.append(Property.objects.create(
+                code=f'PROP-{i}',
+                name=f'Property {i}',
+                manager=self.user,
+                total_area=1000,
+                address='123 Main St',
+                city='City',
+                state='State',
+                pincode='12345'
+            ))
+
+        # Create spaces
+        self.spaces = []
+        for i in range(5):
+            self.spaces.append(Space.objects.create(
+                code=f'SPACE-{i}',
+                name=f'Space {i}',
+                property=self.properties[i],
+                floor=1,
+                area=100,
+                base_rent=1000
+            ))
+
+        # Create bookings
+        for i in range(5):
+            Booking.objects.create(
+                title=f'Booking {i}',
+                space=self.spaces[i],
+                company=self.companies[i],
+                user=self.user,
+                start_time=timezone.now(),
+                end_time=timezone.now() + datetime.timedelta(hours=1),
+                description='Test'
+            )
+
+        self.url = reverse('booking-list')
+
+    def test_booking_list_queries(self):
+        # Initial warmup
+        self.client.get(self.url)
+
+        # We expect a low number of queries if optimized.
+        # If N+1 exists for spaces and companies, queries will be high.
+
+        with self.assertNumQueries(1):
+             response = self.client.get(self.url)
+             self.assertEqual(response.status_code, status.HTTP_200_OK)
