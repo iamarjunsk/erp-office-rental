@@ -1,0 +1,1 @@
+## 2026-02-17 - Inconsistent Login UI | Learning: The login page used raw HTML elements (input, button) instead of the design system components, leading to missing focus states and loading feedback on demo buttons. | Action: Refactored the login page to use shadcn-vue Button, Input, and Label components, ensuring consistent accessibility and visual feedback.
