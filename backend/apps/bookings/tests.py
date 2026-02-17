@@ -1,9 +1,11 @@
 from django.test import TestCase
+from rest_framework.test import APITestCase, APIClient
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
 from django.utils import timezone
+import datetime
 from apps.properties.models import Property
 from apps.spaces.models import Space
+from apps.companies.models import Company
 from .models import Booking
 
 User = get_user_model()
@@ -45,3 +47,45 @@ class BookingTests(TestCase):
         response = self.client.get('/api/bookings/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+class BookingPerformanceTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email='perf_test@example.com', password='password', first_name='Perf', last_name='User')
+        self.client.force_authenticate(user=self.user)
+
+        self.prop = Property.objects.create(
+            name='Perf Prop', code='PP01',
+            address='123 Perf St', city='Perf City', state='Perf State', pincode='54321', total_area=1000
+        )
+
+        # Create multiple spaces and companies to avoid caching
+        self.spaces = []
+        for i in range(5):
+            self.spaces.append(Space.objects.create(
+                property=self.prop, name=f'Space {i}', code=f'PS0{i}', floor=1, area=100, base_rent=1000
+            ))
+
+        self.companies = []
+        for i in range(5):
+            self.companies.append(Company.objects.create(
+                name=f'Company {i}', type='pvt_ltd'
+            ))
+
+    def test_list_bookings_query_count(self):
+        # Create 5 bookings, each with a different space and company
+        for i in range(5):
+            Booking.objects.create(
+                title=f'Meeting {i}',
+                space=self.spaces[i],
+                company=self.companies[i],
+                user=self.user,
+                start_time=timezone.now(),
+                end_time=timezone.now() + datetime.timedelta(hours=2)
+            )
+
+        # With optimization, we expect 1 query (or 2 if count is triggered).
+        # select_related('space', 'company') should fetch everything in the main query.
+
+        with self.assertNumQueries(1):
+             response = self.client.get('/api/bookings/')
+             self.assertEqual(response.status_code, 200)
