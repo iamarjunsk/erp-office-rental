@@ -21,29 +21,39 @@
             <div v-else class="bg-card border border-border rounded-2xl p-8 shadow-2xl">
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
+                    <div class="space-y-2">
+                        <Label for="email">Email</Label>
                         <div class="relative">
                             <Icon name="lucide:mail"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.email" type="email" placeholder="you@example.com"
-                                class="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
+                                class="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground z-10" />
+                            <Input
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                placeholder="you@example.com"
+                                class="pl-10"
+                                required
+                            />
                         </div>
                     </div>
 
                     <!-- Password -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                    <div class="space-y-2">
+                        <Label for="password">Password</Label>
                         <div class="relative">
                             <Icon name="lucide:lock"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                                class="absolute left-3 top-2.5 w-5 h-5 text-muted-foreground z-10" />
+                            <Input
+                                id="password"
+                                v-model="form.password"
+                                :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••"
-                                class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
+                                class="pl-10 pr-10"
+                                required
+                            />
                             <button type="button" @click="showPassword = !showPassword"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                class="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground z-10"
+                                aria-label="Toggle password visibility">
                                 <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
                             </button>
                         </div>
@@ -51,16 +61,16 @@
 
                     <!-- Error Message -->
                     <div v-if="error"
-                        class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+                        class="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm"
+                        role="alert">
                         {{ error }}
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" :disabled="isLoading"
-                        class="w-full py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <Icon v-if="isLoading" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                        <span>{{ isLoading ? 'Signing in...' : 'Sign in' }}</span>
-                    </button>
+                    <Button type="submit" :disabled="isLoading" class="w-full">
+                        <Icon v-if="isLoading" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+                        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+                    </Button>
                 </form>
 
                 <!-- Divider -->
@@ -73,16 +83,14 @@
                 <!-- Demo Accounts -->
                 <div class="space-y-2">
                     <p class="text-sm text-muted-foreground text-center mb-3">Quick login for demo:</p>
-                    <button @click="loginAs('admin@officeerp.com', 'admin123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:shield" class="w-4 h-4" />
+                    <Button variant="outline" @click="loginAs('admin@officeerp.com', 'admin123')" class="w-full">
+                        <Icon name="lucide:shield" class="w-4 h-4 mr-2" />
                         Login as Admin
-                    </button>
-                    <button @click="loginAs('manager@officeerp.com', 'manager123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:user" class="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" @click="loginAs('manager@officeerp.com', 'manager123')" class="w-full">
+                        <Icon name="lucide:user" class="w-4 h-4 mr-2" />
                         Login as Manager
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Register Link -->
@@ -101,6 +109,10 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+
 definePageMeta({
     layout: 'blank',
 })
