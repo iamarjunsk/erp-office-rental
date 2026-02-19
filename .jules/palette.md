@@ -1,0 +1,2 @@
+## 2024-05-23 - Nuxt Component Conflicts | Learning: Shadcn-Vue index files conflict with Nuxt auto-imports causing console spam. | Action: Add `app/components/ui/**/index.ts` to `.nuxtignore`.
+## 2024-05-23 - Radix Tooltip Testing | Learning: Radix Vue renders tooltips with `role="tooltip"` only when visible and often detached, making standard locators flaky. | Action: Target visible text content (e.g., `get_by_text`) in verification scripts.
