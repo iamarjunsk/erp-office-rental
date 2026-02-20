@@ -1,0 +1,1 @@
+## 2024-05-22 - [Login Accessibility] | Learning: Native HTML inputs lacked proper semantic association with labels and error feedback, leading to poor accessibility. | Action: Refactored Login page to use Shadcn-Vue components (Card, Input, Label, Button) with explicit `aria-invalid` states and `aria-label` for interactive elements.
