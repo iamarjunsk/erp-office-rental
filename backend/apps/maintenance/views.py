@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, filters
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db.models import Prefetch
 from django.utils import timezone
 from datetime import timedelta
 from .models import MaintenanceCategory, MaintenanceRequest, MaintenanceTask, MaintenanceComment
@@ -26,7 +27,10 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
     """API endpoint for maintenance requests"""
     queryset = MaintenanceRequest.objects.all().select_related(
         'property', 'space', 'category', 'reported_by', 'assigned_to'
-    ).prefetch_related('tasks', 'comments').order_by('-created_at')
+    ).prefetch_related(
+        Prefetch('tasks', queryset=MaintenanceTask.objects.select_related('assigned_to')),
+        Prefetch('comments', queryset=MaintenanceComment.objects.select_related('author'))
+    ).order_by('-created_at')
     serializer_class = MaintenanceRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
