@@ -21,79 +21,98 @@
             <div v-else class="bg-card border border-border rounded-2xl p-8 shadow-2xl">
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
+                    <div class="grid gap-2">
+                        <Label for="email" :class="{ 'text-destructive': error }">Email</Label>
                         <div class="relative">
                             <Icon name="lucide:mail"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.email" type="email" placeholder="you@example.com"
-                                class="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
+                                class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                placeholder="you@example.com"
+                                class="pl-10"
+                                :class="{ 'border-destructive': error }"
+                                :aria-invalid="!!error"
+                                aria-describedby="auth-error"
+                                required
+                            />
                         </div>
                     </div>
 
                     <!-- Password -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                    <div class="grid gap-2">
+                        <Label for="password" :class="{ 'text-destructive': error }">Password</Label>
                         <div class="relative">
                             <Icon name="lucide:lock"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                                class="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                            <Input
+                                id="password"
+                                v-model="form.password"
+                                :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••"
-                                class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
-                            <button type="button" @click="showPassword = !showPassword"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                class="pl-10 pr-10"
+                                :class="{ 'border-destructive': error }"
+                                :aria-invalid="!!error"
+                                aria-describedby="auth-error"
+                                required
+                            />
+                            <button
+                                type="button"
+                                @click="showPassword = !showPassword"
+                                class="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-none"
+                                aria-label="Toggle password visibility"
+                            >
+                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="h-5 w-5" />
                             </button>
                         </div>
                     </div>
 
                     <!-- Error Message -->
-                    <div v-if="error"
-                        class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+                    <div v-if="error" id="auth-error"
+                        class="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm" role="alert">
                         {{ error }}
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" :disabled="isLoading"
-                        class="w-full py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <Icon v-if="isLoading" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                        <span>{{ isLoading ? 'Signing in...' : 'Sign in' }}</span>
-                    </button>
+                    <Button type="submit" :disabled="isLoading" class="w-full">
+                        <Icon v-if="isLoading" name="lucide:loader-2" class="mr-2 h-4 w-4 animate-spin" />
+                        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+                    </Button>
                 </form>
 
                 <!-- Divider -->
-                <div class="flex items-center my-6">
-                    <div class="flex-1 border-t border-border"></div>
-                    <span class="px-4 text-sm text-muted-foreground">or</span>
-                    <div class="flex-1 border-t border-border"></div>
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <span class="w-full border-t border-border" />
+                    </div>
+                    <div class="relative flex justify-center text-xs uppercase">
+                        <span class="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    </div>
                 </div>
 
                 <!-- Demo Accounts -->
-                <div class="space-y-2">
-                    <p class="text-sm text-muted-foreground text-center mb-3">Quick login for demo:</p>
-                    <button @click="loginAs('admin@officeerp.com', 'admin123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:shield" class="w-4 h-4" />
+                <div class="grid gap-2">
+                    <p class="text-sm text-muted-foreground text-center mb-1">Quick login for demo:</p>
+                    <Button variant="outline" @click="loginAs('admin@officeerp.com', 'admin123')" class="w-full">
+                        <Icon name="lucide:shield" class="mr-2 h-4 w-4" />
                         Login as Admin
-                    </button>
-                    <button @click="loginAs('manager@officeerp.com', 'manager123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:user" class="w-4 h-4" />
+                    </Button>
+                    <Button variant="outline" @click="loginAs('manager@officeerp.com', 'manager123')" class="w-full">
+                        <Icon name="lucide:user" class="mr-2 h-4 w-4" />
                         Login as Manager
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Register Link -->
                 <p class="text-center mt-6 text-sm text-muted-foreground">
                     Don't have an account?
-                    <NuxtLink to="/register" class="text-primary hover:underline">Sign up</NuxtLink>
+                    <NuxtLink to="/register" class="text-primary hover:underline font-medium">Sign up</NuxtLink>
                 </p>
             </div>
 
             <!-- Footer -->
-            <p class="text-center mt-6 text-sm text-slate-500">
+            <p class="text-center mt-6 text-sm text-muted-foreground">
                 © 2024 OfficeERP. All rights reserved.
             </p>
         </div>
@@ -101,6 +120,10 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+
 definePageMeta({
     layout: 'blank',
 })
@@ -122,7 +145,6 @@ onMounted(async () => {
     }
     
     // If already authenticated, redirect to admin
-    // But only if user didn't come from a protected page (avoiding redirect loops)
     if (isAuthenticated.value) {
         const redirectTo = useRoute().query.redirect as string
         navigateTo(redirectTo || '/admin')
