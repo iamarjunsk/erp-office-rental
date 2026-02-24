@@ -1,0 +1,1 @@
+## 2026-02-24 - Authentication UX | Learning: Login forms lacked accessible feedback and consistent styling | Action: Implemented shadcn-vue Button, Input, and Label components with proper aria attributes and loading states.
