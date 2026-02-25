@@ -1,0 +1,1 @@
+## 2024-02-25 - shadcn-vue Integration | Learning: shadcn-vue CLI requires root tsconfig.json for alias resolution and may use reka-ui instead of radix-vue. | Action: Ensure root tsconfig extends Nuxt config and refactor components to use radix-vue.
