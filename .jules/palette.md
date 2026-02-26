@@ -1,0 +1,1 @@
+## 2025-02-28 - Search Experience | Learning: Users often need a quick way to clear search filters and return to the main list without manual deletion. | Action: Implemented a "Clear Search" button and `/` keyboard shortcut for rapid access.
