@@ -201,6 +201,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { error } = useToast()
 const API_BASE = 'http://localhost:8000/api/maintenance'
 
 const route = useRoute()
@@ -242,9 +243,9 @@ const updateRequest = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update request:\n${errors}`)
+      error('Failed to update request', errors)
     } else {
-      alert('Failed to update maintenance request')
+      error('Error', 'Failed to update maintenance request')
     }
   } finally {
     saving.value = false

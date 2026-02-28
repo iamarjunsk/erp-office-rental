@@ -1,0 +1,1 @@
+## 2024-03-01 - Replace Native Alerts with Toast | Learning: Native `alert()` calls are disruptive and block the main thread, leading to a poor UX. | Action: Replaced native `alert()` calls with `useToast()` notifications in the maintenance module to provide non-blocking, visually consistent feedback.

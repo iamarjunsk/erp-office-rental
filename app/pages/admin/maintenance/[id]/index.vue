@@ -342,6 +342,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { error } = useToast()
 const API_BASE = 'http://localhost:8000/api/maintenance'
 
 const route = useRoute()
@@ -412,7 +413,7 @@ const assignRequest = async () => {
     showAssignModal.value = false
     await refresh()
   } catch (e: any) {
-    alert('Failed to assign request: ' + (e.data?.error || 'Unknown error'))
+    error('Failed to assign request', e.data?.error || 'Unknown error')
   } finally {
     assigning.value = false
   }
@@ -428,7 +429,7 @@ const startWork = async () => {
     
     await refresh()
   } catch (e: any) {
-    alert('Failed to start work: ' + (e.data?.error || 'Unknown error'))
+    error('Failed to start work', e.data?.error || 'Unknown error')
   } finally {
     updating.value = false
   }
@@ -446,7 +447,7 @@ const completeRequest = async () => {
     showCompleteModal.value = false
     await refresh()
   } catch (e: any) {
-    alert('Failed to complete request: ' + (e.data?.error || 'Unknown error'))
+    error('Failed to complete request', e.data?.error || 'Unknown error')
   } finally {
     completing.value = false
   }
@@ -470,7 +471,7 @@ const addComment = async () => {
     isInternalComment.value = false
     await refresh()
   } catch (e: any) {
-    alert('Failed to add comment: ' + (e.data?.error || 'Unknown error'))
+    error('Failed to add comment', e.data?.error || 'Unknown error')
   } finally {
     addingComment.value = false
   }
