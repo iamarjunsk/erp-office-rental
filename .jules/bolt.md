@@ -1,0 +1,3 @@
+## 2024-03-01 - N+1 Queries with Nested Serializers
+**Learning:** When using DRF serializers with nested relationships (e.g., `tasks` and `comments` in `MaintenanceRequestSerializer`), `prefetch_related('tasks')` is not enough if the nested serializer fetches its own foreign keys (e.g., `task.assigned_to_details`). This leads to a hidden N+1 query problem.
+**Action:** Use `django.db.models.Prefetch` inside `prefetch_related` to explicitly join the nested foreign keys, e.g., `Prefetch('tasks', queryset=MaintenanceTask.objects.select_related('assigned_to'))`. Always add an `APITestCase` with `self.assertNumQueries()` to prevent regression.
