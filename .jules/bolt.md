@@ -1,0 +1,3 @@
+## 2025-02-28 - [Fix N+1 query on Purchase Requisitions list]
+**Learning:** The `PurchaseRequisitionListSerializer` had a `SerializerMethodField` called `converted_to_po` that accessed a foreign key not included in the ViewSet's `select_related` call, leading to an N+1 query problem. This specific pattern (a `SerializerMethodField` returning a dictionary of related model attributes) is a common source of hidden N+1 queries.
+**Action:** When inspecting a slow list endpoint, explicitly check `SerializerMethodField` implementations to ensure any accessed related models are properly fetched using `select_related` or `prefetch_related` in the ViewSet's `queryset`.
