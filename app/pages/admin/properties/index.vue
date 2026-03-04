@@ -82,20 +82,39 @@
                 {{ property.manager_details ? `${property.manager_details.first_name} ${property.manager_details.last_name}` : 'Unassigned' }}
               </td>
               <td class="px-4 py-3 text-sm">
-                <div class="flex items-center gap-2">
-                  <button 
-                    @click="viewProperty(property)"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                  >
-                    <Icon name="lucide:eye" class="w-4 h-4" />
-                  </button>
-                  <button 
-                    @click="editProperty(property)"
-                    class="p-2 text-muted-foreground hover:text-foreground rounded-lg hover:bg-muted"
-                  >
-                    <Icon name="lucide:pencil" class="w-4 h-4" />
-                  </button>
-                </div>
+                <TooltipProvider>
+                  <div class="flex items-center gap-2">
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="View property"
+                          @click="viewProperty(property)"
+                          class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                          <Icon name="lucide:eye" class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>View property</TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger as-child>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label="Edit property"
+                          @click="editProperty(property)"
+                          class="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        >
+                          <Icon name="lucide:pencil" class="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Edit property</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
               </td>
             </tr>
             <tr v-if="properties.length === 0">
@@ -135,6 +154,9 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+
 // Simple debounce implementation since lodash-es is not available
 const debounce = (fn: Function, delay: number) => {
   let timeoutId: any
