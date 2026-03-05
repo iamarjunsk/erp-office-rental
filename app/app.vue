@@ -4,6 +4,7 @@
       <NuxtPage />
     </NuxtLayout>
     <UiToastProvider />
+    <UiSonner />
   </div>
 </template>
 

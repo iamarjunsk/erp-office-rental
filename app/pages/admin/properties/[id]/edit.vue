@@ -153,6 +153,8 @@
 </template>
 
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -222,9 +224,11 @@ const updateProperty = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update property:\n${errors}`)
+      toast.error('Failed to update property', {
+        description: errors
+      })
     } else {
-      alert('Failed to update property')
+      toast.error('Failed to update property')
     }
   } finally {
     saving.value = false
