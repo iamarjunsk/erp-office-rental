@@ -151,6 +151,8 @@
 </template>
 
 <script setup lang="ts">
+import { toast } from 'vue-sonner'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -206,9 +208,11 @@ const createProperty = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create property:\n${errors}`)
+      toast.error('Failed to create property', {
+        description: errors
+      })
     } else {
-      alert('Failed to create property')
+      toast.error('Failed to create property')
     }
   } finally {
     creating.value = false
