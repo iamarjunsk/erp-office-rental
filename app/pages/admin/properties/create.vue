@@ -141,8 +141,9 @@
         <button 
           type="submit"
           :disabled="creating"
-          class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
+          class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50"
         >
+          <Icon v-if="creating" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ creating ? 'Creating...' : 'Create Property' }}
         </button>
       </div>
@@ -159,6 +160,8 @@ definePageMeta({
 const { authHeaders } = useAuth()
 // Use hardcoded localhost for now matching verification success
 const API_BASE = 'http://localhost:8000/api/properties'
+
+const { error } = useToast()
 
 const creating = ref(false)
 
@@ -206,9 +209,9 @@ const createProperty = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create property:\n${errors}`)
+      error('Failed to create property', errors)
     } else {
-      alert('Failed to create property')
+      error('Failed to create property')
     }
   } finally {
     creating.value = false
