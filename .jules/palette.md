@@ -1,0 +1,1 @@
+## 2026-03-07 - Replace Native Alerts | Learning: Native alerts cause jarring UX interruptions and break theme consistency. | Action: Replaced native window alerts with shadcn-vue toast notifications for error handling in Bookings and Reports modules.
