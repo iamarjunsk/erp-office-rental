@@ -218,6 +218,8 @@
 </template>
 
 <script setup lang="ts">
+const { error } = useToast()
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -267,9 +269,9 @@ const createCompany = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create company:\n${errors}`)
+      error('Error', `Failed to create company:\n${errors}`)
     } else {
-      alert('Failed to create company')
+      error('Error', 'Failed to create company')
     }
   } finally {
     creating.value = false
