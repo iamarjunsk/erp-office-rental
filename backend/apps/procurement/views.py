@@ -48,7 +48,8 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     API endpoint for managing purchase requisitions
     """
     queryset = PurchaseRequisition.objects.all().select_related(
-        'requested_by', 'property_ref', 'approved_by'
+        # Added converted_to_po to select_related to fix N+1 query in SerializerMethodField
+        'requested_by', 'property_ref', 'approved_by', 'converted_to_po'
     ).prefetch_related('items').order_by('-created_at')
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
