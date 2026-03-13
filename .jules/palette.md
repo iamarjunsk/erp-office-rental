@@ -1,0 +1,1 @@
+## 2026-03-13 - Replace native alerts with Toast notifications | Learning: Native `alert()` breaks immersion and can block the main thread, causing poor user experience. | Action: Replaced native `alert()` calls with shadcn-vue `useToast().error()` in Vue components for better consistency and non-blocking notifications.
