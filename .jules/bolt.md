@@ -1,0 +1,2 @@
+
+## 2024-05-17 - [Fix N+1 query in PurchaseRequisitionViewSet] **Learning:** When a `SerializerMethodField` accesses a related model via foreign key (like `obj.converted_to_po`), it causes an N+1 query issue if the related model isn't included in the ViewSet's `select_related` or `prefetch_related`. **Action:** Always review `SerializerMethodField` implementations in DRF serializers. If they access a related object's attributes, explicitly add `select_related('foreign_key')` to the ViewSet queryset to prevent N+1 query bottlenecks.
