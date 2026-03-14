@@ -1,0 +1,1 @@
+## 2024-05-18 - Tooltips for icon-only buttons | Learning: Icon-only buttons currently lack `aria-label` attributes and tooltip functionality, which harms accessibility and makes it difficult for users to know what these buttons do. | Action: Add standard shadcn `Tooltip` components around these buttons, and assign descriptive `aria-label`s.

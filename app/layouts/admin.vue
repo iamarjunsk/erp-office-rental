@@ -36,9 +36,16 @@
             <p class="text-sm font-semibold text-slate-900 truncate">{{ user?.first_name || 'User' }} {{ user?.last_name || '' }}</p>
             <p class="text-xs text-slate-500 truncate group-hover:text-slate-700">{{ user?.email || 'Not logged in' }}</p>
           </div>
-          <button @click="logout" title="Logout" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-            <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <button @click="logout" aria-label="Logout" class="p-1 hover:bg-slate-100 rounded-lg transition-colors">
+                  <Icon name="lucide:log-out" class="w-5 h-5 text-slate-400 hover:text-slate-900 transition-colors" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Logout</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
     </aside>
@@ -48,10 +55,17 @@
       <header class="h-16 border-b border-border bg-background flex items-center justify-between px-8 sticky top-0 z-10">
         <h1 class="text-xl font-bold text-slate-800 capitalize">{{ $route.path.split('/').pop()?.replace('-', ' ') || 'Dashboard' }}</h1>
         <div class="flex items-center gap-4">
-          <button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
-            <Icon name="lucide:bell" class="w-5 h-5" />
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <button aria-label="Notifications" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors relative">
+                  <Icon name="lucide:bell" class="w-5 h-5" />
+                  <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>Notifications</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </header>
       <div class="p-8">
