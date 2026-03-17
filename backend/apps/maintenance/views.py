@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
 from datetime import timedelta
+from django.db.models import Count, Q
 from .models import MaintenanceCategory, MaintenanceRequest, MaintenanceTask, MaintenanceComment
 from .serializers import (
     MaintenanceCategorySerializer,
@@ -146,30 +147,18 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get maintenance statistics"""
-        total = MaintenanceRequest.objects.count()
-        open_count = MaintenanceRequest.objects.filter(status='open').count()
-        in_progress = MaintenanceRequest.objects.filter(status='in_progress').count()
-        completed = MaintenanceRequest.objects.filter(status='completed').count()
+        # Performance optimization: Reduced 7 separate COUNT queries into 1 aggregate query using Count with filter=Q(...)
+        stats = MaintenanceRequest.objects.aggregate(
+            total=Count('id'),
+            open=Count('id', filter=Q(status='open')),
+            inProgress=Count('id', filter=Q(status='in_progress')),
+            completed=Count('id', filter=Q(status='completed')),
+            urgent=Count('id', filter=Q(priority='urgent', status__in=['open', 'assigned', 'in_progress'])),
+            highPriority=Count('id', filter=Q(priority='high', status__in=['open', 'assigned', 'in_progress'])),
+            overdue=Count('id', filter=Q(scheduled_date__lt=timezone.now().date(), status__in=['open', 'assigned', 'in_progress']))
+        )
         
-        # Priority breakdown
-        urgent = MaintenanceRequest.objects.filter(priority='urgent', status__in=['open', 'assigned', 'in_progress']).count()
-        high = MaintenanceRequest.objects.filter(priority='high', status__in=['open', 'assigned', 'in_progress']).count()
-        
-        # Overdue count
-        overdue = MaintenanceRequest.objects.filter(
-            scheduled_date__lt=timezone.now().date(),
-            status__in=['open', 'assigned', 'in_progress']
-        ).count()
-        
-        return Response({
-            'total': total,
-            'open': open_count,
-            'inProgress': in_progress,
-            'completed': completed,
-            'urgent': urgent,
-            'highPriority': high,
-            'overdue': overdue
-        })
+        return Response(stats)
 
 
 class MaintenanceTaskViewSet(viewsets.ModelViewSet):
