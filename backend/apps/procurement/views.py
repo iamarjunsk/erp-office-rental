@@ -90,17 +90,22 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get requisition statistics"""
+        from django.db.models import Count, Sum, Q
+
         queryset = self.get_queryset()
         
-        stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'pending_approval': queryset.filter(status='pending_approval').count(),
-            'approved': queryset.filter(status='approved').count(),
-            'rejected': queryset.filter(status='rejected').count(),
-            'converted_to_po': queryset.filter(status='converted_to_po').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_estimated_amount'))['total'] or 0,
-        }
+        # ⚡ Bolt Optimization: Queries: 7 -> 1
+        stats = queryset.aggregate(
+            total=Count('id'),
+            draft=Count('id', filter=Q(status='draft')),
+            pending_approval=Count('id', filter=Q(status='pending_approval')),
+            approved=Count('id', filter=Q(status='approved')),
+            rejected=Count('id', filter=Q(status='rejected')),
+            converted_to_po=Count('id', filter=Q(status='converted_to_po')),
+            totalValue=Sum('total_estimated_amount')
+        )
+
+        stats['totalValue'] = stats['totalValue'] or 0
         
         return Response(stats)
     
@@ -256,17 +261,22 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get PO statistics"""
+        from django.db.models import Count, Sum, Q
+
         queryset = self.get_queryset()
         
-        stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'sent': queryset.filter(status='sent').count(),
-            'acknowledged': queryset.filter(status='acknowledged').count(),
-            'partially_received': queryset.filter(status='partially_received').count(),
-            'received': queryset.filter(status='received').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_amount'))['total'] or 0,
-        }
+        # ⚡ Bolt Optimization: Queries: 7 -> 1
+        stats = queryset.aggregate(
+            total=Count('id'),
+            draft=Count('id', filter=Q(status='draft')),
+            sent=Count('id', filter=Q(status='sent')),
+            acknowledged=Count('id', filter=Q(status='acknowledged')),
+            partially_received=Count('id', filter=Q(status='partially_received')),
+            received=Count('id', filter=Q(status='received')),
+            totalValue=Sum('total_amount')
+        )
+
+        stats['totalValue'] = stats['totalValue'] or 0
         
         return Response(stats)
     

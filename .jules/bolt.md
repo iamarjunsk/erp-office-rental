@@ -1,0 +1,3 @@
+## 2024-05-18 - [Django ORM: Stats aggregations]
+**Learning:** Multiple consecutive `count()` and `aggregate()` statements for simple stats generation cause the Django ORM to execute many separate database queries. This is a common performance bottleneck in stats dashboards or analytic endpoints, doing N distinct `SELECT COUNT(*)` queries.
+**Action:** Use a single `aggregate()` with multiple `Count(filter=Q(...))` expressions. This combines all aggregations into one database roundtrip using `COUNT(CASE WHEN ... THEN 1 ELSE NULL END)`. I optimized `MaintenanceRequest.stats` and Procurement `PurchaseRequisition.stats`, `PurchaseOrder.stats` to go from ~7 queries each to exactly 1 query.
