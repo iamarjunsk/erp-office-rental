@@ -1,0 +1,1 @@
+## 2024-05-24 - [Fix N+1 query on PR List] **Learning:** When rendering SerializerMethodFields in DRF serializers that fetch a related object (e.g. `obj.converted_to_po`), it triggers an N+1 query issue for list endpoints. **Action:** Always include the related field name in the `select_related` statement of the queryset used by the ViewSet to fetch it all in one query.
