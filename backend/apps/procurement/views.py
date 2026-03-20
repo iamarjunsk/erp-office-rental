@@ -47,8 +47,10 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing purchase requisitions
     """
+    # ⚡ Bolt: Added 'converted_to_po' to select_related to fix N+1 query issue in ListSerializer.
+    # Impact: Reduces database queries when fetching the PR list (e.g. from 5 -> 2 for 2 items).
     queryset = PurchaseRequisition.objects.all().select_related(
-        'requested_by', 'property_ref', 'approved_by'
+        'requested_by', 'property_ref', 'approved_by', 'converted_to_po'
     ).prefetch_related('items').order_by('-created_at')
     permission_classes = [permissions.AllowAny]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
