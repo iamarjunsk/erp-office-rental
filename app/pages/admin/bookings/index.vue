@@ -157,6 +157,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const config = useRuntimeConfig()
 const API_BASE = 'http://localhost:8000/api/bookings'
 const SPACES_API = 'http://localhost:8000/api/spaces'
@@ -254,8 +255,16 @@ const createBooking = async () => {
     showAddModal.value = false
     newBooking.value = { title: '', space: '', company: '', start_time: '', end_time: '', description: '' }
     await refreshBookings()
+    toast({
+      title: 'Success',
+      description: 'Booking created successfully',
+    })
   } catch (e: any) {
-    alert(e.data?.detail || 'Failed to create booking')
+    toast({
+      title: 'Error',
+      description: e.data?.detail || 'Failed to create booking',
+      variant: 'destructive',
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -271,8 +280,16 @@ const deleteBooking = async (id: number) => {
       headers: authHeaders()
     })
     await refreshBookings()
+    toast({
+      title: 'Success',
+      description: 'Booking deleted successfully',
+    })
   } catch (e: any) {
-    alert('Failed to delete booking: ' + (e.message || 'Unknown error'))
+    toast({
+      title: 'Error',
+      description: 'Failed to delete booking: ' + (e.message || 'Unknown error'),
+      variant: 'destructive',
+    })
   }
 }
 </script>
