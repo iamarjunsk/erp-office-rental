@@ -4,6 +4,7 @@ from rest_framework.test import APIClient
 from django.utils import timezone
 from apps.properties.models import Property
 from apps.spaces.models import Space
+from apps.companies.models import Company
 from .models import Booking
 
 User = get_user_model()
@@ -45,3 +46,38 @@ class BookingTests(TestCase):
         response = self.client.get('/api/bookings/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+class BookingPerformanceTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(email='perf@example.com', password='password', first_name='Perf', last_name='User')
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+        self.prop = Property.objects.create(
+            name='Test Prop', code='TP01',
+            address='123 St', city='City', state='State', pincode='12345', total_area=1000
+        )
+        self.space1 = Space.objects.create(
+            property=self.prop, name='Space 1', code='S01', floor=1, area=100, base_rent=1000
+        )
+        self.space2 = Space.objects.create(
+            property=self.prop, name='Space 2', code='S02', floor=2, area=200, base_rent=2000
+        )
+        self.company1 = Company.objects.create(name='Company 1')
+        self.company2 = Company.objects.create(name='Company 2')
+
+        Booking.objects.create(
+            title='Meeting 1', space=self.space1, company=self.company1, user=self.user,
+            start_time=timezone.now(), end_time=timezone.now() + timezone.timedelta(hours=1)
+        )
+        Booking.objects.create(
+            title='Meeting 2', space=self.space2, company=self.company2, user=self.user,
+            start_time=timezone.now(), end_time=timezone.now() + timezone.timedelta(hours=1)
+        )
+
+    def test_list_bookings_queries(self):
+        # We expect 1 query to fetch the bookings with their spaces and companies
+        with self.assertNumQueries(1):
+            response = self.client.get('/api/bookings/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 2)
