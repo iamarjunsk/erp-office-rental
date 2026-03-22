@@ -1,0 +1,1 @@
+## 2024-05-24 - Replace native alerts with shadcn Toast | Learning: Using native alerts creates poor user experience and content shifts. | Action: Replaced all `alert()` calls with `useToast()` composable showing destructive toast messages for error cases.

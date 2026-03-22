@@ -203,6 +203,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/users'
 
 definePageMeta({
@@ -272,7 +273,7 @@ const saveUser = async () => {
         showEditModal.value = false
         await refresh()
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to update user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to update user', variant: 'destructive' })
     } finally {
         isSubmitting.value = false
     }
@@ -287,7 +288,7 @@ const deactivateUser = async () => {
         })
         await refresh()
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to deactivate user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to deactivate user', variant: 'destructive' })
     }
 }
 
@@ -300,7 +301,7 @@ const activateUser = async () => {
         })
         await refresh()
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to activate user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to activate user', variant: 'destructive' })
     }
 }
 </script>
