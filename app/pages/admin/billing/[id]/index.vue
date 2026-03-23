@@ -338,6 +338,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/billing'
 
 const route = useRoute()
@@ -416,7 +417,7 @@ const submitPayment = async () => {
       status: 'completed'
     }
   } catch (e: any) {
-    alert('Failed to record payment: ' + (e.data?.detail || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to record payment: ' + (e.data?.detail || 'Unknown error'), variant: 'destructive' })
   } finally {
     submittingPayment.value = false
   }
@@ -444,7 +445,7 @@ const downloadInvoice = async () => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    alert('Failed to download invoice: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to download invoice: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   } finally {
     downloading.value = false
   }

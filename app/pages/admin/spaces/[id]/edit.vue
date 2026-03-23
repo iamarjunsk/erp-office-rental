@@ -179,6 +179,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/spaces'
 const PROPERTIES_API = 'http://localhost:8000/api/properties'
 
@@ -248,9 +249,9 @@ const updateSpace = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update space:\n${errors}`)
+      toast({ title: 'Error', description: `Failed to update space:\n${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to update space')
+      toast({ title: 'Error', description: 'Failed to update space', variant: 'destructive' })
     }
   } finally {
     saving.value = false

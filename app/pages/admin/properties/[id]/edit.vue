@@ -159,6 +159,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 // Use hardcoded localhost for now matching verification success
 const API_BASE = 'http://localhost:8000/api/properties'
 
@@ -222,9 +223,9 @@ const updateProperty = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update property:\n${errors}`)
+      toast({ title: 'Error', description: `Failed to update property:\n${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to update property')
+      toast({ title: 'Error', description: 'Failed to update property', variant: 'destructive' })
     }
   } finally {
     saving.value = false

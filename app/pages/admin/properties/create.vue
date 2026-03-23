@@ -157,6 +157,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 // Use hardcoded localhost for now matching verification success
 const API_BASE = 'http://localhost:8000/api/properties'
 
@@ -206,9 +207,9 @@ const createProperty = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create property:\n${errors}`)
+      toast({ title: 'Error', description: `Failed to create property:\n${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to create property')
+      toast({ title: 'Error', description: 'Failed to create property', variant: 'destructive' })
     }
   } finally {
     creating.value = false
