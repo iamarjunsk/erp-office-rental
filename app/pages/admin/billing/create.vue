@@ -279,6 +279,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api'
 
 const creating = ref(false)
@@ -382,9 +383,9 @@ const createInvoice = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create invoice:\n${errors}`)
+      toast({ title: 'Error', description: `Failed to create invoice:\n${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to create invoice')
+      toast({ title: 'Error', description: 'Failed to create invoice', variant: 'destructive' })
     }
   } finally {
     creating.value = false

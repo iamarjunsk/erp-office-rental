@@ -139,6 +139,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/reports'
 
 const { data } = await useFetch(`${API_BASE}/dashboard/`, {
@@ -188,7 +189,7 @@ const exportReports = async () => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    alert('Failed to export report: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to export report: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   }
 }
 </script>

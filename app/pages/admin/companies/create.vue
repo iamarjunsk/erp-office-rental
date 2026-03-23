@@ -224,6 +224,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/companies'
 
 const creating = ref(false)
@@ -267,9 +268,9 @@ const createCompany = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create company:\n${errors}`)
+      toast({ title: 'Error', description: `Failed to create company:\n${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to create company')
+      toast({ title: 'Error', description: 'Failed to create company', variant: 'destructive' })
     }
   } finally {
     creating.value = false
