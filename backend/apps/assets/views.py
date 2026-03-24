@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from datetime import date, timedelta
+from django.db.models import Count, Q, Sum
 from .models import Asset, AssetCategory, AssetMaintenance, AssetAssignmentHistory
 from .serializers import (
     AssetSerializer,
@@ -161,40 +162,29 @@ class AssetViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get asset statistics"""
-        total = Asset.objects.count()
-        active = Asset.objects.filter(status='active').count()
-        in_maintenance = Asset.objects.filter(status='in_maintenance').count()
-        disposed = Asset.objects.filter(status='disposed').count()
+        today = date.today()
         
-        # Total value
-        from django.db.models import Sum
-        total_value = Asset.objects.filter(status='active').aggregate(
-            total=Sum('purchase_price')
-        )['total'] or 0
-        
-        # Warranty status
-        under_warranty = Asset.objects.filter(
-            warranty_expiry__gte=date.today()
-        ).count()
-        warranty_expired = Asset.objects.filter(
-            warranty_expiry__lt=date.today()
-        ).count()
-        
-        # Maintenance due
-        maintenance_due = Asset.objects.filter(
-            next_maintenance_date__lte=date.today(),
-            status='active'
-        ).count()
+        # ⚡ Bolt: Optimize asset stats with a single aggregate query (8 queries -> 1)
+        stats = Asset.objects.aggregate(
+            total_count=Count('id'),
+            active=Count('id', filter=Q(status='active')),
+            in_maintenance=Count('id', filter=Q(status='in_maintenance')),
+            disposed=Count('id', filter=Q(status='disposed')),
+            total_value=Sum('purchase_price', filter=Q(status='active')),
+            under_warranty=Count('id', filter=Q(warranty_expiry__gte=today)),
+            warranty_expired=Count('id', filter=Q(warranty_expiry__lt=today)),
+            maintenance_due=Count('id', filter=Q(next_maintenance_date__lte=today, status='active'))
+        )
         
         return Response({
-            'total': total,
-            'active': active,
-            'inMaintenance': in_maintenance,
-            'disposed': disposed,
-            'totalValue': total_value,
-            'underWarranty': under_warranty,
-            'warrantyExpired': warranty_expired,
-            'maintenanceDue': maintenance_due
+            'total': stats['total_count'] or 0,
+            'active': stats['active'] or 0,
+            'inMaintenance': stats['in_maintenance'] or 0,
+            'disposed': stats['disposed'] or 0,
+            'totalValue': stats['total_value'] or 0,
+            'underWarranty': stats['under_warranty'] or 0,
+            'warrantyExpired': stats['warranty_expired'] or 0,
+            'maintenanceDue': stats['maintenance_due'] or 0
         })
 
 
