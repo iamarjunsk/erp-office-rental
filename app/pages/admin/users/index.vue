@@ -186,10 +186,13 @@
               class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
           </div>
           <div class="flex justify-end gap-3 pt-4">
-            <button type="button" @click="showAddModal = false"
-              class="px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
-            <button type="submit"
-              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">Add User</button>
+            <button type="button" @click="showAddModal = false" :disabled="isSubmitting"
+              class="px-4 py-2 border border-border rounded-lg hover:bg-muted disabled:opacity-50">Cancel</button>
+            <button type="submit" :disabled="isSubmitting"
+              class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2">
+              <Icon v-if="isSubmitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+              Add User
+            </button>
           </div>
         </form>
       </div>
@@ -206,6 +209,7 @@ definePageMeta({
 })
 
 const { getAccessToken, authHeaders } = useAuth()
+const { toast } = useToast()
 
 // Fetch users from Django API
 const { data: usersData, pending: loading, refresh } = await useFetch<any[]>(`${API_BASE}/`, {
@@ -268,8 +272,10 @@ const addUser = async () => {
     showAddModal.value = false
     newUser.value = { first_name: '', last_name: '', email: '', role: 'staff', department: '', password: '', password_confirm: '' }
     await refresh()
+    toast({ title: 'Success', description: 'User added successfully' })
   } catch (e: any) {
-    alert(e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user')
+    const errorMsg = e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user'
+    toast({ title: 'Error', description: errorMsg, variant: 'destructive' })
   } finally {
     isSubmitting.value = false
   }
