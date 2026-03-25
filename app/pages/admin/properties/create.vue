@@ -151,6 +151,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -205,10 +206,10 @@ const createProperty = async () => {
       // Format validation errors to readable string
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-        .join('\n')
-      alert(`Failed to create property:\n${errors}`)
+        .join(', ')
+      toast({ title: 'Error', description: `Failed to create property: ${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to create property')
+      toast({ title: 'Error', description: 'Failed to create property', variant: 'destructive' })
     }
   } finally {
     creating.value = false
