@@ -133,6 +133,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -188,7 +189,7 @@ const exportReports = async () => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    alert('Failed to export report: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to export report: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   }
 }
 </script>

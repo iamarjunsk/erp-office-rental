@@ -326,7 +326,7 @@ const createAsset = async () => {
     if (e.data && typeof e.data === 'object') {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-        .join('\n')
+        .join(', ')
       errorMessage = errors
     } else if (e.data) {
       errorMessage = String(e.data)
