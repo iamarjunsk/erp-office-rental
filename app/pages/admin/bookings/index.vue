@@ -149,6 +149,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, addMonths, isSameMonth, parseISO } from 'date-fns'
 
 definePageMeta({
@@ -255,7 +256,7 @@ const createBooking = async () => {
     newBooking.value = { title: '', space: '', company: '', start_time: '', end_time: '', description: '' }
     await refreshBookings()
   } catch (e: any) {
-    alert(e.data?.detail || 'Failed to create booking')
+    toast({ title: 'Error', description: e.data?.detail || 'Failed to create booking', variant: 'destructive' })
   } finally {
     isSubmitting.value = false
   }
@@ -272,7 +273,7 @@ const deleteBooking = async (id: number) => {
     })
     await refreshBookings()
   } catch (e: any) {
-    alert('Failed to delete booking: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to delete booking: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   }
 }
 </script>

@@ -240,6 +240,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 const debounce = (fn: Function, delay: number) => {
   let timeoutId: any
   return (...args: any[]) => {
@@ -366,7 +367,7 @@ const downloadInvoice = async (invoice: any) => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    alert('Failed to download invoice: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to download invoice: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   } finally {
     downloadingId.value = null
   }
@@ -404,13 +405,13 @@ const submitPayment = async () => {
       status: 'completed'
     }
   } catch (e: any) {
-    alert('Failed to record payment: ' + (e.data?.detail || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to record payment: ' + (e.data?.detail || 'Unknown error'), variant: 'destructive' })
   } finally {
     submittingPayment.value = false
   }
 }
 
 const exportInvoices = () => {
-  alert('Export functionality coming soon!')
+  toast({ title: 'Error', description: 'Export functionality coming soon!', variant: 'destructive' })
 }
 </script>
