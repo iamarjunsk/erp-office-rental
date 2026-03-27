@@ -41,17 +41,29 @@
                     <!-- Password -->
                     <div>
                         <label class="block text-sm font-medium mb-2">Password</label>
-                        <input v-model="form.password" type="password" placeholder="••••••••"
-                            class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                            required />
+                        <div class="relative">
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
+                                class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required />
+                            <button type="button" @click="showPassword = !showPassword" aria-label="Toggle password visibility"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Confirm Password -->
                     <div>
                         <label class="block text-sm font-medium mb-2">Confirm Password</label>
-                        <input v-model="form.password_confirm" type="password" placeholder="••••••••"
-                            class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                            required />
+                        <div class="relative">
+                            <input v-model="form.password_confirm" :type="showPasswordConfirm ? 'text' : 'password'" placeholder="••••••••"
+                                class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
+                                required />
+                            <button type="button" @click="showPasswordConfirm = !showPasswordConfirm" aria-label="Toggle password visibility"
+                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                <Icon :name="showPasswordConfirm ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Error Message -->
@@ -84,6 +96,9 @@ definePageMeta({
 })
 
 const { register, isLoading, error } = useAuth()
+
+const showPassword = ref(false)
+const showPasswordConfirm = ref(false)
 
 const form = ref({
     email: '',
