@@ -168,6 +168,8 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -228,10 +230,10 @@ const createRequest = async () => {
     if (e.data) {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-        .join('\n')
-      alert(`Failed to create request:\n${errors}`)
+        .join(', ')
+      toast({ title: 'Error', description: `Failed to create request: ${errors}`, variant: 'destructive' })
     } else {
-      alert('Failed to create maintenance request')
+      toast({ title: 'Error', description: 'Failed to create maintenance request', variant: 'destructive' })
     }
   } finally {
     creating.value = false
