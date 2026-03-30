@@ -212,6 +212,7 @@ definePageMeta({
 
 const route = useRoute()
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 
 // Fetch user from Django API
 const { data: userData, pending: loading, refresh } = await useFetch<any>(`${API_BASE}/${route.params.id}/`, {
@@ -271,8 +272,17 @@ const saveUser = async () => {
         })
         showEditModal.value = false
         await refresh()
+        toast({
+            title: 'Success',
+            description: 'User updated successfully',
+            variant: 'default',
+        })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to update user')
+        toast({
+            title: 'Error',
+            description: e.data?.detail || 'Failed to update user',
+            variant: 'destructive',
+        })
     } finally {
         isSubmitting.value = false
     }
@@ -286,8 +296,17 @@ const deactivateUser = async () => {
             body: { is_active: false },
         })
         await refresh()
+        toast({
+            title: 'Success',
+            description: 'User deactivated successfully',
+            variant: 'default',
+        })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to deactivate user')
+        toast({
+            title: 'Error',
+            description: e.data?.detail || 'Failed to deactivate user',
+            variant: 'destructive',
+        })
     }
 }
 
@@ -299,8 +318,17 @@ const activateUser = async () => {
             body: { is_active: true },
         })
         await refresh()
+        toast({
+            title: 'Success',
+            description: 'User activated successfully',
+            variant: 'default',
+        })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to activate user')
+        toast({
+            title: 'Error',
+            description: e.data?.detail || 'Failed to activate user',
+            variant: 'destructive',
+        })
     }
 }
 </script>
