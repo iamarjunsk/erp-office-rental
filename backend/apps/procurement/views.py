@@ -30,14 +30,24 @@ class VendorViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get vendor statistics"""
+        from django.db.models import Count, Q
         queryset = self.get_queryset()
         
+        # Optimize stats calculation to use a single database query
+        stats_data = queryset.aggregate(
+            total=Count('pk'),
+            active=Count('pk', filter=Q(status='active')),
+            inactive=Count('pk', filter=Q(status='inactive')),
+            suppliers=Count('pk', filter=Q(vendor_type='supplier')),
+            serviceProviders=Count('pk', filter=Q(vendor_type='service_provider'))
+        )
+
         stats = {
-            'total': queryset.count(),
-            'active': queryset.filter(status='active').count(),
-            'inactive': queryset.filter(status='inactive').count(),
-            'suppliers': queryset.filter(vendor_type='supplier').count(),
-            'serviceProviders': queryset.filter(vendor_type='service_provider').count(),
+            'total': stats_data['total'],
+            'active': stats_data['active'],
+            'inactive': stats_data['inactive'],
+            'suppliers': stats_data['suppliers'],
+            'serviceProviders': stats_data['serviceProviders'],
         }
         
         return Response(stats)
@@ -90,16 +100,28 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get requisition statistics"""
+        from django.db.models import Count, Sum, Q
         queryset = self.get_queryset()
         
+        # Optimize stats calculation to use a single database query
+        stats_data = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            pending_approval=Count('pk', filter=Q(status='pending_approval')),
+            approved=Count('pk', filter=Q(status='approved')),
+            rejected=Count('pk', filter=Q(status='rejected')),
+            converted_to_po=Count('pk', filter=Q(status='converted_to_po')),
+            totalValue=Sum('total_estimated_amount')
+        )
+
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'pending_approval': queryset.filter(status='pending_approval').count(),
-            'approved': queryset.filter(status='approved').count(),
-            'rejected': queryset.filter(status='rejected').count(),
-            'converted_to_po': queryset.filter(status='converted_to_po').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_estimated_amount'))['total'] or 0,
+            'total': stats_data['total'],
+            'draft': stats_data['draft'],
+            'pending_approval': stats_data['pending_approval'],
+            'approved': stats_data['approved'],
+            'rejected': stats_data['rejected'],
+            'converted_to_po': stats_data['converted_to_po'],
+            'totalValue': stats_data['totalValue'] or 0,
         }
         
         return Response(stats)
@@ -256,16 +278,28 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get PO statistics"""
+        from django.db.models import Count, Sum, Q
         queryset = self.get_queryset()
         
+        # Optimize stats calculation to use a single database query
+        stats_data = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            sent=Count('pk', filter=Q(status='sent')),
+            acknowledged=Count('pk', filter=Q(status='acknowledged')),
+            partially_received=Count('pk', filter=Q(status='partially_received')),
+            received=Count('pk', filter=Q(status='received')),
+            totalValue=Sum('total_amount')
+        )
+
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'sent': queryset.filter(status='sent').count(),
-            'acknowledged': queryset.filter(status='acknowledged').count(),
-            'partially_received': queryset.filter(status='partially_received').count(),
-            'received': queryset.filter(status='received').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_amount'))['total'] or 0,
+            'total': stats_data['total'],
+            'draft': stats_data['draft'],
+            'sent': stats_data['sent'],
+            'acknowledged': stats_data['acknowledged'],
+            'partially_received': stats_data['partially_received'],
+            'received': stats_data['received'],
+            'totalValue': stats_data['totalValue'] or 0,
         }
         
         return Response(stats)
