@@ -31,12 +31,18 @@ class DashboardStatsView(APIView):
             payment_date__gte=month_start
         ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # Outstanding
-        outstanding_dues = Invoice.objects.aggregate(Sum('balance_due'))['balance_due__sum'] or 0
+        # Outstanding & Collection Rate
+        # Optimized: Combined multiple aggregations into a single query to reduce database roundtrips
+        invoice_aggregates = Invoice.objects.aggregate(
+            outstanding_dues=Sum('balance_due'),
+            total_invoiced=Sum('total_amount'),
+            total_paid=Sum('amount_paid')
+        )
 
-        # Collection Rate
-        total_invoiced = Invoice.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-        total_paid = Invoice.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+        outstanding_dues = invoice_aggregates['outstanding_dues'] or 0
+        total_invoiced = invoice_aggregates['total_invoiced'] or 0
+        total_paid = invoice_aggregates['total_paid'] or 0
+
         collection_rate = (total_paid / total_invoiced * 100) if total_invoiced > 0 else 0
 
         # Maintenance
