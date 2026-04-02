@@ -1,0 +1,1 @@
+## 2024-05-15 - Add accessible password toggles with tooltips to auth forms | Learning: generic icon-only buttons for toggling passwords lack context for screen readers and some visual users. | Action: Added dynamic aria-label attributes and shadcn-vue tooltips to all password inputs across auth forms to improve accessibility and user feedback.

@@ -41,17 +41,45 @@
                     <!-- Password -->
                     <div>
                         <label class="block text-sm font-medium mb-2">Password</label>
-                        <input v-model="form.password" type="password" placeholder="••••••••"
-                            class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                            required />
+                        <div class="relative">
+                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
+                                class="w-full px-4 py-3 pr-12 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                required />
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <button type="button" @click="showPassword = !showPassword"
+                                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md p-1">
+                                            <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{{ showPassword ? 'Hide password' : 'Show password' }}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                     </div>
 
                     <!-- Confirm Password -->
                     <div>
                         <label class="block text-sm font-medium mb-2">Confirm Password</label>
-                        <input v-model="form.password_confirm" type="password" placeholder="••••••••"
-                            class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
-                            required />
+                        <div class="relative">
+                            <input v-model="form.password_confirm" :type="showConfirmPassword ? 'text' : 'password'" placeholder="••••••••"
+                                class="w-full px-4 py-3 pr-12 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                required />
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <button type="button" @click="showConfirmPassword = !showConfirmPassword"
+                                            :aria-label="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md p-1">
+                                            <Icon :name="showConfirmPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{{ showConfirmPassword ? 'Hide confirm password' : 'Show confirm password' }}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        </div>
                     </div>
 
                     <!-- Error Message -->
@@ -92,6 +120,9 @@ const form = ref({
     first_name: '',
     last_name: '',
 })
+
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
 
 const handleRegister = async () => {
     const result = await register(form.value)
