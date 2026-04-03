@@ -92,3 +92,9 @@ class ReportsTests(TestCase):
         content = response.content.decode('utf-8')
         self.assertIn('Occupancy Rate (%),100.0', content)
         self.assertIn('Total Revenue (INR),1180', content)
+
+    def test_dashboard_stats_query_count(self):
+        """Test that DashboardStatsView.get_stats executes an optimized number of queries (6)"""
+        with self.assertNumQueries(6):
+            response = self.client.get('/api/reports/dashboard/')
+            self.assertEqual(response.status_code, 200)

@@ -1,0 +1,1 @@
+## 2026-03-04 - [Tooltip Accessibility] | Learning: [Radix UI Tooltip elements render hidden accessibility spans, requiring `get_by_text` for Playwright targeting instead of typical role queries] | Action: [Add tooltip providers with aria-labels to generic icon buttons for properties table list.]
