@@ -182,8 +182,14 @@
           </div>
           <div>
             <label class="text-sm font-medium">Password *</label>
-            <input v-model="newUser.password" type="password" required
-              class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+            <div class="relative mt-1">
+              <input v-model="newUser.password" :type="showAddModalPassword ? 'text' : 'password'" required
+                class="w-full px-4 py-2 bg-background border border-border rounded-lg pr-10" />
+              <button type="button" @click="showAddModalPassword = !showAddModalPassword" aria-label="Toggle password visibility"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  <Icon :name="showAddModalPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-4 h-4" />
+              </button>
+            </div>
           </div>
           <div class="flex justify-end gap-3 pt-4">
             <button type="button" @click="showAddModal = false"
@@ -218,6 +224,7 @@ const users = computed(() => usersData.value || [])
 const searchQuery = ref('')
 const roleFilter = ref('')
 const showAddModal = ref(false)
+const showAddModalPassword = ref(false)
 const isSubmitting = ref(false)
 
 const newUser = ref({

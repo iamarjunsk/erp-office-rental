@@ -1,4 +1,4 @@
-from django.test import TestCase
+from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from django.utils import timezone
@@ -8,7 +8,7 @@ from .models import Booking
 
 User = get_user_model()
 
-class BookingTests(TestCase):
+class BookingTests(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(email='test@example.com', password='password', first_name='Test', last_name='User')
         self.client = APIClient()
@@ -45,3 +45,31 @@ class BookingTests(TestCase):
         response = self.client.get('/api/bookings/')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
+
+    def test_n_plus_one_queries(self):
+        from apps.companies.models import Company
+        from django.test.utils import CaptureQueriesContext
+        from django.db import connection
+
+        company1 = Company.objects.create(name='Company 1')
+        company2 = Company.objects.create(name='Company 2')
+        space2 = Space.objects.create(property=self.prop, name='Space 2', code='S02', floor=1, area=100, base_rent=1000)
+
+        # Create multiple bookings
+        for i in range(5):
+            Booking.objects.create(
+                title=f'Meeting {i}',
+                space=self.space if i % 2 == 0 else space2,
+                company=company1 if i % 2 == 0 else company2,
+                user=self.user,
+                start_time=timezone.now(),
+                end_time=timezone.now() + timezone.timedelta(hours=1)
+            )
+
+        with CaptureQueriesContext(connection) as ctx:
+            response = self.client.get('/api/bookings/')
+            self.assertEqual(response.status_code, 200)
+
+        # 1 query for the bookings (+ space and company data via select_related)
+        # Should be well below 5 queries
+        self.assertLessEqual(len(ctx), 4)
