@@ -1,0 +1,3 @@
+## 2024-04-04 - [Optimize multiple count queries into a single aggregate]
+**Learning:** When calculating multiple sums or conditional counts on the same model in Django ORM, combining them into a single `.aggregate()` call using multiple fields (e.g., `Count('pk', filter=Q(...))`) significantly reduces database roundtrips compared to chaining individual `.count()` queries. In `apps.maintenance`, this optimization reduced 7 queries to 1.
+**Action:** Use `aggregate()` with `Count` and `Q` objects whenever computing multiple statistics across the same queryset instead of executing separate `.count()` or `.aggregate()` queries.
