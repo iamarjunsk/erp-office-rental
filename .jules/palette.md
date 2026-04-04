@@ -1,0 +1,1 @@
+## 2024-06-25 - Form Accessibility Improvements | Learning: Missing `for`/`id` bindings and dynamic `aria-label`s on icon buttons impair screen reader usability, and alert roles improve error handling UX. | Action: Added explicit bindings to auth forms and improved visibility toggles and error banners for better accessibility.
