@@ -1,0 +1,1 @@
+## 2026-04-05 - Bookings Accessibility & Feedback Gaps | Learning: Form inputs were missing IDs linking to labels, and native alerts blocked execution during booking creation/deletion. | Action: Applied aria-labels to icon-only buttons, linked form labels, and replaced alerts with toast notifications.
