@@ -19,11 +19,11 @@
       <div class="flex items-center justify-between mb-6">
         <h3 class="text-lg font-semibold">Booking Calendar</h3>
         <div class="flex items-center gap-2">
-          <button @click="changeMonth(-1)" class="p-2 border border-border rounded-lg hover:bg-muted">
+          <button @click="changeMonth(-1)" aria-label="Previous Month" class="p-2 border border-border rounded-lg hover:bg-muted">
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
           <span class="px-4 py-2 border border-border rounded-lg">{{ currentMonthName }} {{ currentYear }}</span>
-          <button @click="changeMonth(1)" class="p-2 border border-border rounded-lg hover:bg-muted">
+          <button @click="changeMonth(1)" aria-label="Next Month" class="p-2 border border-border rounded-lg hover:bg-muted">
             <Icon name="lucide:chevron-right" class="w-4 h-4" />
           </button>
         </div>
@@ -76,6 +76,7 @@
             </div>
             <button
               @click="deleteBooking(booking.id)"
+              aria-label="Delete Booking"
               class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Delete Booking"
             >
@@ -94,18 +95,18 @@
       <div class="bg-card rounded-xl w-full max-w-lg m-4 max-h-[90vh] overflow-y-auto">
         <div class="p-6 border-b border-border flex items-center justify-between">
           <h3 class="text-lg font-semibold">New Booking</h3>
-          <button @click="showAddModal = false" class="p-2 hover:bg-muted rounded-full">
+          <button @click="showAddModal = false" aria-label="Close" class="p-2 hover:bg-muted rounded-full">
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
         <form @submit.prevent="createBooking" class="p-6 space-y-4">
           <div>
-            <label class="text-sm font-medium">Title *</label>
-            <input v-model="newBooking.title" type="text" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+            <label for="title" class="text-sm font-medium">Title *</label>
+            <input id="title" v-model="newBooking.title" type="text" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
           </div>
           <div>
-            <label class="text-sm font-medium">Space *</label>
-            <select v-model="newBooking.space" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
+            <label for="space" class="text-sm font-medium">Space *</label>
+            <select id="space" v-model="newBooking.space" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
               <option value="" disabled>Select Space</option>
               <option v-for="space in spaces" :key="space.id" :value="space.id">
                 {{ space.name }} ({{ space.code }})
@@ -113,8 +114,8 @@
             </select>
           </div>
           <div>
-            <label class="text-sm font-medium">Company (Optional)</label>
-            <select v-model="newBooking.company" class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
+            <label for="company" class="text-sm font-medium">Company (Optional)</label>
+            <select id="company" v-model="newBooking.company" class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg">
               <option value="">None</option>
               <option v-for="company in companies" :key="company.id" :value="company.id">
                 {{ company.name }}
@@ -123,17 +124,17 @@
           </div>
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <label class="text-sm font-medium">Start Time *</label>
-              <input v-model="newBooking.start_time" type="datetime-local" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+              <label for="start_time" class="text-sm font-medium">Start Time *</label>
+              <input id="start_time" v-model="newBooking.start_time" type="datetime-local" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
             </div>
             <div>
-              <label class="text-sm font-medium">End Time *</label>
-              <input v-model="newBooking.end_time" type="datetime-local" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
+              <label for="end_time" class="text-sm font-medium">End Time *</label>
+              <input id="end_time" v-model="newBooking.end_time" type="datetime-local" required class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg" />
             </div>
           </div>
           <div>
-            <label class="text-sm font-medium">Description</label>
-            <textarea v-model="newBooking.description" rows="3" class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg"></textarea>
+            <label for="description" class="text-sm font-medium">Description</label>
+            <textarea id="description" v-model="newBooking.description" rows="3" class="w-full mt-1 px-4 py-2 bg-background border border-border rounded-lg"></textarea>
           </div>
 
           <div class="flex justify-end gap-3 pt-4">
@@ -150,12 +151,14 @@
 
 <script setup lang="ts">
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, format, addMonths, isSameMonth, parseISO } from 'date-fns'
+import { useToast } from '~/composables/use-toast'
 
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
 })
 
+const { toast } = useToast()
 const { authHeaders } = useAuth()
 const config = useRuntimeConfig()
 const API_BASE = 'http://localhost:8000/api/bookings'
@@ -255,7 +258,7 @@ const createBooking = async () => {
     newBooking.value = { title: '', space: '', company: '', start_time: '', end_time: '', description: '' }
     await refreshBookings()
   } catch (e: any) {
-    alert(e.data?.detail || 'Failed to create booking')
+    toast({ title: 'Error', description: e.data?.detail || 'Failed to create booking', variant: 'destructive' })
   } finally {
     isSubmitting.value = false
   }
@@ -272,7 +275,7 @@ const deleteBooking = async (id: number) => {
     })
     await refreshBookings()
   } catch (e: any) {
-    alert('Failed to delete booking: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: 'Failed to delete booking: ' + (e.message || 'Unknown error'), variant: 'destructive' })
   }
 }
 </script>
