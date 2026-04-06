@@ -174,6 +174,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api'
 
 const creating = ref(false)
@@ -226,12 +227,17 @@ const createRequest = async () => {
     navigateTo('/admin/maintenance')
   } catch (e: any) {
     if (e.data) {
-      const errors = Object.entries(e.data)
-        .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-        .join('\n')
-      alert(`Failed to create request:\n${errors}`)
+      const parseErrors = (obj: any): string[] => {
+        return Object.entries(obj).flatMap(([k, v]) => {
+          if (Array.isArray(v)) return [`${k}: ${v.join(', ')}`]
+          if (typeof v === 'object' && v !== null) return parseErrors(v).map(msg => `${k}.${msg}`)
+          return [`${k}: ${v}`]
+        })
+      }
+      const errors = parseErrors(e.data).join(', ')
+      toast({ title: 'Error', description: errors, variant: 'destructive' })
     } else {
-      alert('Failed to create maintenance request')
+      toast({ title: 'Error', description: 'Failed to create maintenance request', variant: 'destructive' })
     }
   } finally {
     creating.value = false
