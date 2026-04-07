@@ -22,11 +22,11 @@
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <label for="email" class="block text-sm font-medium mb-2">Email</label>
                         <div class="relative">
                             <Icon name="lucide:mail"
                                 class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.email" type="email" placeholder="you@example.com"
+                            <input id="email" v-model="form.email" type="email" placeholder="you@example.com"
                                 class="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
                         </div>
@@ -34,15 +34,16 @@
 
                     <!-- Password -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <label for="password" class="block text-sm font-medium mb-2">Password</label>
                         <div class="relative">
                             <Icon name="lucide:lock"
                                 class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                            <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••"
                                 class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
                             <button type="button" @click="showPassword = !showPassword"
+                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                                 <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
                             </button>
@@ -50,7 +51,7 @@
                     </div>
 
                     <!-- Error Message -->
-                    <div v-if="error"
+                    <div v-if="error" role="alert"
                         class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
                         {{ error }}
                     </div>

@@ -1,0 +1,1 @@
+## 2026-04-07 - [Form Accessibility Improvements] | Learning: [Auth forms lack proper label association and dynamic aria-labels for screen readers] | Action: [Add 'for' and 'id' attributes to form inputs, and dynamic aria-labels to icon buttons]
