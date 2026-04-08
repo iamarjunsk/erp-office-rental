@@ -1,0 +1,1 @@
+## 2024-04-08 - Form Accessibility Enhancements | Learning: Auth forms lacked label associations, dynamic aria-labels on toggles, and role="alert" for error states | Action: Added standard id/for bindings and dynamic aria attributes to improve screen reader support.
