@@ -1,0 +1,1 @@
+## 2026-03-08 - Replace Native Alerts with Toast Notifications | Learning: Several admin pages are using native alert() for API error handling which disrupts flow and causes styling inconsistencies. | Action: Started an incremental refactoring process by replacing alert() with useToast().error() in the Bookings component.
