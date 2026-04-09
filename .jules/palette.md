@@ -1,0 +1,1 @@
+## 2024-03-17 - Replace native alerts with toasts | Learning: Native alerts block the UI and provide a poor user experience. | Action: Replaced native alerts with shadcn-vue toast notifications for error handling in maintenance forms.
