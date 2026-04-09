@@ -42,10 +42,20 @@
                                 placeholder="••••••••"
                                 class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
-                            <button type="button" @click="showPassword = !showPassword"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
-                            </button>
+                            <UiTooltipProvider>
+                                <UiTooltip>
+                                    <UiTooltipTrigger as-child>
+                                        <button type="button" @click="showPassword = !showPassword"
+                                            aria-label="Toggle password visibility"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md p-1">
+                                            <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </UiTooltipTrigger>
+                                    <UiTooltipContent>
+                                        <p>Toggle password visibility</p>
+                                    </UiTooltipContent>
+                                </UiTooltip>
+                            </UiTooltipProvider>
                         </div>
                     </div>
 
