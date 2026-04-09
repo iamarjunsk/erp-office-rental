@@ -212,6 +212,7 @@ definePageMeta({
 })
 
 const { getAccessToken, authHeaders } = useAuth()
+const { toast } = useToast()
 
 // Fetch users from Django API
 const { data: usersData, pending: loading, refresh } = await useFetch<any[]>(`${API_BASE}/`, {
@@ -275,8 +276,17 @@ const addUser = async () => {
     showAddModal.value = false
     newUser.value = { first_name: '', last_name: '', email: '', role: 'staff', department: '', password: '', password_confirm: '' }
     await refresh()
+    toast({
+      title: 'Success',
+      description: 'User added successfully',
+      variant: 'default',
+    })
   } catch (e: any) {
-    alert(e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user')
+    toast({
+      title: 'Error',
+      description: e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user',
+      variant: 'destructive',
+    })
   } finally {
     isSubmitting.value = false
   }
