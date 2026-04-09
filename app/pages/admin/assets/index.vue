@@ -74,14 +74,32 @@
 
     <!-- Filters -->
     <div class="flex flex-wrap gap-4">
-      <div class="flex-1 min-w-[250px] relative">
-        <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+      <div class="flex-1 min-w-[250px] relative group">
+        <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
         <input 
+          ref="searchInput"
           v-model="searchQuery"
           type="text"
           placeholder="Search by asset code, name, or serial..."
-          class="w-full pl-10 pr-4 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          class="w-full pl-10 pr-12 py-2 bg-card border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-shadow"
         />
+        <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="text-muted-foreground hover:text-foreground p-0.5 rounded-full hover:bg-muted transition-colors"
+            title="Clear search"
+            aria-label="Clear search"
+          >
+            <Icon name="lucide:x" class="w-4 h-4" />
+          </button>
+          <kbd
+            v-else
+            class="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100"
+          >
+            <span class="text-xs">/</span>
+          </kbd>
+        </div>
       </div>
       <select 
         v-model="statusFilter"
@@ -210,7 +228,7 @@
 </template>
 
 <script setup lang="ts">
-import { onClickOutside } from '@vueuse/core'
+import { onClickOutside, useMagicKeys, whenever } from '@vueuse/core'
 const debounce = (fn: Function, delay: number) => {
   let timeoutId: any
   return (...args: any[]) => {
@@ -227,6 +245,15 @@ definePageMeta({
 const { authHeaders } = useAuth()
 const { info, success, error } = useToast()
 const API_BASE = 'http://localhost:8000/api/assets'
+
+const searchInput = ref<HTMLInputElement | null>(null)
+const { Slash } = useMagicKeys()
+
+whenever(Slash, () => {
+  if (document.activeElement === searchInput.value) return
+  if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName || '')) return
+  searchInput.value?.focus()
+})
 
 const searchQuery = ref('')
 const statusFilter = ref('')
