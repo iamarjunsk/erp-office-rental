@@ -1,0 +1,1 @@
+## 2024-03-21 - Login Accessibility Improvements | Learning: Login forms frequently lack clear screen reader announcements for password visibility toggles and error messages, and often miss basic label associations. | Action: Added matching `for`/`id` properties on inputs, `aria-label` with `focus-visible` styling on the password toggle, and `role="alert"` for the error banner.
