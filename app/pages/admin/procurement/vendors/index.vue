@@ -137,9 +137,22 @@
               <div class="text-sm text-muted-foreground">{{ selectedVendor.code }} • {{ selectedVendor.vendor_type === 'service_provider' ? 'Service Provider' : 'Supplier' }}</div>
             </div>
           </div>
-          <button @click="selectedVendor = null" class="p-2 hover:bg-muted rounded-full">
-            <Icon name="lucide:x" class="w-5 h-5" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="rounded-full h-9 w-9"
+                  aria-label="Close details"
+                  @click="selectedVendor = null"
+                >
+                  <Icon name="lucide:x" class="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Close details</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         
         <div class="p-6 space-y-6">
@@ -233,9 +246,22 @@
       <div class="bg-card rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
         <div class="p-6 border-b border-border flex items-center justify-between">
           <h3 class="text-lg font-semibold">Add New Vendor</h3>
-          <button @click="showAddModal = false" class="p-2 hover:bg-muted rounded-full">
-            <Icon name="lucide:x" class="w-5 h-5" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger as-child>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  class="rounded-full h-9 w-9"
+                  aria-label="Close modal"
+                  @click="showAddModal = false"
+                >
+                  <Icon name="lucide:x" class="w-5 h-5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Close modal</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
         <form @submit.prevent="submitVendor" class="p-6 space-y-6">
           <!-- Basic Info -->
@@ -407,6 +433,9 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '~/components/ui/button'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
+
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],

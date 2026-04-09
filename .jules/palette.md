@@ -1,0 +1,1 @@
+## 2024-05-18 - Missing Tooltips on Icon Buttons | Learning: Icon-only buttons without accessible labels or tooltips lead to poor UX and accessibility issues. | Action: Added Tooltip components to icon-only buttons in the vendor management UI.
