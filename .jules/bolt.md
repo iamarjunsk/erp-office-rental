@@ -1,0 +1,1 @@
+## 2024-05-14 - Django Stats N+1 Anti-pattern | **Learning:** stats endpoints frequently make 5-8 roundtrips and should use aggregate(Count(..., filter=Q(...))). | **Action:** Use aggregate(Count(..., filter=Q(...)))
