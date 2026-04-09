@@ -1,0 +1,1 @@
+## 2024-05-15 - Django DRF Serializer N+1 queries **Learning:** Missed `select_related` for nested serializer representations (e.g. `SerializerMethodField` fields evaluating related objects). **Action:** Always add `select_related` and `prefetch_related` to Django views when serializing nested representations to prevent N+1 query loops.
