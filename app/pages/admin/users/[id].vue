@@ -35,14 +35,16 @@
                     <Icon name="lucide:edit" class="w-4 h-4" />
                     Edit
                 </button>
-                <button v-if="user?.is_active" @click="deactivateUser"
-                    class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                    <Icon name="lucide:user-x" class="w-4 h-4" />
+                <button v-if="user?.is_active" @click="deactivateUser" :disabled="isDeactivating"
+                    class="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50">
+                    <Icon v-if="isDeactivating" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                    <Icon v-else name="lucide:user-x" class="w-4 h-4" />
                     Deactivate
                 </button>
-                <button v-else @click="activateUser"
-                    class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
-                    <Icon name="lucide:user-check" class="w-4 h-4" />
+                <button v-else @click="activateUser" :disabled="isActivating"
+                    class="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50">
+                    <Icon v-if="isActivating" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                    <Icon v-else name="lucide:user-check" class="w-4 h-4" />
                     Activate
                 </button>
             </div>
@@ -192,9 +194,11 @@
                     <div class="flex justify-end gap-3 pt-4">
                         <button type="button" @click="showEditModal = false"
                             class="px-4 py-2 border border-border rounded-lg hover:bg-muted">Cancel</button>
-                        <button type="submit"
-                            class="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90">Save
-                            Changes</button>
+                        <button type="submit" :disabled="isSubmitting"
+                            class="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50">
+                            <Icon v-if="isSubmitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                            Save Changes
+                        </button>
                     </div>
                 </form>
             </div>
@@ -235,6 +239,9 @@ const editForm = ref({
     department: '',
 })
 const isSubmitting = ref(false)
+const isDeactivating = ref(false)
+const isActivating = ref(false)
+const { toast } = useToast()
 
 // Sync edit form when user loads
 watchEffect(() => {
@@ -271,14 +278,16 @@ const saveUser = async () => {
         })
         showEditModal.value = false
         await refresh()
+        toast({ title: 'Success', description: 'User updated successfully' })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to update user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to update user', variant: 'destructive' })
     } finally {
         isSubmitting.value = false
     }
 }
 
 const deactivateUser = async () => {
+    isDeactivating.value = true
     try {
         await $fetch(`${API_BASE}/${route.params.id}/`, {
             method: 'PATCH',
@@ -286,12 +295,16 @@ const deactivateUser = async () => {
             body: { is_active: false },
         })
         await refresh()
+        toast({ title: 'Success', description: 'User deactivated successfully' })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to deactivate user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to deactivate user', variant: 'destructive' })
+    } finally {
+        isDeactivating.value = false
     }
 }
 
 const activateUser = async () => {
+    isActivating.value = true
     try {
         await $fetch(`${API_BASE}/${route.params.id}/`, {
             method: 'PATCH',
@@ -299,8 +312,11 @@ const activateUser = async () => {
             body: { is_active: true },
         })
         await refresh()
+        toast({ title: 'Success', description: 'User activated successfully' })
     } catch (e: any) {
-        alert(e.data?.detail || 'Failed to activate user')
+        toast({ title: 'Error', description: e.data?.detail || 'Failed to activate user', variant: 'destructive' })
+    } finally {
+        isActivating.value = false
     }
 }
 </script>
