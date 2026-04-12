@@ -93,14 +93,25 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
         """Get requisition statistics"""
         queryset = self.get_queryset()
         
+        # ⚡ Bolt: Consolidated 7 queries into a single aggregate query to improve performance
+        aggs = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            pending_approval=Count('pk', filter=Q(status='pending_approval')),
+            approved=Count('pk', filter=Q(status='approved')),
+            rejected=Count('pk', filter=Q(status='rejected')),
+            converted_to_po=Count('pk', filter=Q(status='converted_to_po')),
+            totalValue=Sum('total_estimated_amount')
+        )
+
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'pending_approval': queryset.filter(status='pending_approval').count(),
-            'approved': queryset.filter(status='approved').count(),
-            'rejected': queryset.filter(status='rejected').count(),
-            'converted_to_po': queryset.filter(status='converted_to_po').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_estimated_amount'))['total'] or 0,
+            'total': aggs['total'],
+            'draft': aggs['draft'],
+            'pending_approval': aggs['pending_approval'],
+            'approved': aggs['approved'],
+            'rejected': aggs['rejected'],
+            'converted_to_po': aggs['converted_to_po'],
+            'totalValue': aggs['totalValue'] or 0,
         }
         
         return Response(stats)
@@ -259,14 +270,25 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         """Get PO statistics"""
         queryset = self.get_queryset()
         
+        # ⚡ Bolt: Consolidated 7 queries into a single aggregate query to improve performance
+        aggs = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            sent=Count('pk', filter=Q(status='sent')),
+            acknowledged=Count('pk', filter=Q(status='acknowledged')),
+            partially_received=Count('pk', filter=Q(status='partially_received')),
+            received=Count('pk', filter=Q(status='received')),
+            totalValue=Sum('total_amount')
+        )
+
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'sent': queryset.filter(status='sent').count(),
-            'acknowledged': queryset.filter(status='acknowledged').count(),
-            'partially_received': queryset.filter(status='partially_received').count(),
-            'received': queryset.filter(status='received').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_amount'))['total'] or 0,
+            'total': aggs['total'],
+            'draft': aggs['draft'],
+            'sent': aggs['sent'],
+            'acknowledged': aggs['acknowledged'],
+            'partially_received': aggs['partially_received'],
+            'received': aggs['received'],
+            'totalValue': aggs['totalValue'] or 0,
         }
         
         return Response(stats)
