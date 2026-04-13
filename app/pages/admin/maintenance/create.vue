@@ -174,6 +174,7 @@ definePageMeta({
 })
 
 const { authHeaders } = useAuth()
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api'
 
 const creating = ref(false)
@@ -228,10 +229,10 @@ const createRequest = async () => {
     if (e.data) {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-        .join('\n')
-      alert(`Failed to create request:\n${errors}`)
+        .join(', ')
+      toast({ title: 'Validation Error', description: errors, variant: 'destructive' })
     } else {
-      alert('Failed to create maintenance request')
+      toast({ title: 'Error', description: 'Failed to create maintenance request', variant: 'destructive' })
     }
   } finally {
     creating.value = false
