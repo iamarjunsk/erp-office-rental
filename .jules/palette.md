@@ -1,0 +1,1 @@
+## 2024-04-14 - Add Tooltips to Password Toggles | Learning: Icon-only buttons for toggling password visibility in auth forms lack tooltips to explain their function, which could be confusing for accessibility. | Action: Wrap these buttons in shadcn Tooltips and ensure they have `aria-label` attributes.
