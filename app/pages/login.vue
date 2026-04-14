@@ -42,10 +42,20 @@
                                 placeholder="••••••••"
                                 class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
-                            <button type="button" @click="showPassword = !showPassword"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
-                            </button>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <button type="button" @click="showPassword = !showPassword"
+                                            :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                            <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {{ showPassword ? 'Hide password' : 'Show password' }}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
 
@@ -101,6 +111,13 @@
 </template>
 
 <script setup lang="ts">
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+
 definePageMeta({
     layout: 'blank',
 })
