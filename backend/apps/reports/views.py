@@ -20,35 +20,49 @@ class DashboardStatsView(APIView):
         today = timezone.now().date()
         month_start = today.replace(day=1)
 
-        # Occupancy
-        total_spaces = Space.objects.count()
-        occupied_spaces = Space.objects.filter(current_status='occupied').count()
+        # Occupancy - ⚡ Bolt: Combined space queries
+        space_stats = Space.objects.aggregate(
+            total=Count('pk'),
+            occupied=Count('pk', filter=Q(current_status='occupied'))
+        )
+        total_spaces = space_stats['total']
+        occupied_spaces = space_stats['occupied']
         occupancy_rate = (occupied_spaces / total_spaces * 100) if total_spaces > 0 else 0
 
-        # Revenue
-        total_revenue = Invoice.objects.filter(status='paid').aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        # Revenue & Outstanding - ⚡ Bolt: Combined invoice queries
+        invoice_stats = Invoice.objects.aggregate(
+            total_invoiced=Sum('total_amount'),
+            total_paid=Sum('amount_paid'),
+            outstanding_dues=Sum('balance_due'),
+            total_revenue=Sum('total_amount', filter=Q(status='paid'))
+        )
+        total_revenue = invoice_stats['total_revenue'] or 0
+        outstanding_dues = invoice_stats['outstanding_dues'] or 0
+        total_invoiced = invoice_stats['total_invoiced'] or 0
+        total_paid = invoice_stats['total_paid'] or 0
+
         monthly_revenue = Payment.objects.filter(
             payment_date__gte=month_start
         ).aggregate(Sum('amount'))['amount__sum'] or 0
 
-        # Outstanding
-        outstanding_dues = Invoice.objects.aggregate(Sum('balance_due'))['balance_due__sum'] or 0
-
         # Collection Rate
-        total_invoiced = Invoice.objects.aggregate(Sum('total_amount'))['total_amount__sum'] or 0
-        total_paid = Invoice.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
         collection_rate = (total_paid / total_invoiced * 100) if total_invoiced > 0 else 0
 
-        # Maintenance
-        total_tickets = MaintenanceRequest.objects.count()
-        completed_tickets = MaintenanceRequest.objects.filter(status='completed').count()
+        # Maintenance - ⚡ Bolt: Combined maintenance queries
+        maintenance_stats = MaintenanceRequest.objects.aggregate(
+            total=Count('pk'),
+            completed=Count('pk', filter=Q(status='completed'))
+        )
+        total_tickets = maintenance_stats['total']
+        completed_tickets = maintenance_stats['completed']
 
-        # Leases
-        active_leases = Lease.objects.filter(status='active').count()
-        expiring_leases = Lease.objects.filter(
-            status='active',
-            end_date__lte=today + timedelta(days=30)
-        ).count()
+        # Leases - ⚡ Bolt: Combined lease queries
+        lease_stats = Lease.objects.aggregate(
+            active=Count('pk', filter=Q(status='active')),
+            expiring=Count('pk', filter=Q(status='active', end_date__lte=today + timedelta(days=30)))
+        )
+        active_leases = lease_stats['active']
+        expiring_leases = lease_stats['expiring']
 
         return {
             'occupancy_rate': round(occupancy_rate, 1),
