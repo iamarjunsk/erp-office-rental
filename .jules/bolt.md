@@ -1,0 +1,3 @@
+## 2024-04-16 - Multiple ORM Counts **Learning:** Multiple sequential `.count()` calls in a ViewSet action each trigger a separate round-trip query to the database, creating an N+1-like bottleneck. **Action:** Always combine these into a single query using `.aggregate()` with `Count` and `Q` objects to retrieve all statistics simultaneously.
+
+## 2024-04-16 - Virtual Environment Activation **Learning:** The project relies on globally installed dependencies or a pre-configured Docker-like container environment where a local `backend/venv` does not exist. **Action:** Execute Python commands (e.g., `python manage.py test`) directly without attempting to source an activation script.
