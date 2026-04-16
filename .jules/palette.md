@@ -1,0 +1,1 @@
+## 2026-04-16 - Accessibility Improvements for Auth Forms | Learning: Forms lacked explicit label associations and dynamic aria-labels for password toggles. | Action: Added 'for'/'id' pairings and dynamic 'aria-label's.
