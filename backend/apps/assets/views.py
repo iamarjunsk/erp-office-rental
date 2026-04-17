@@ -161,40 +161,29 @@ class AssetViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get asset statistics"""
-        total = Asset.objects.count()
-        active = Asset.objects.filter(status='active').count()
-        in_maintenance = Asset.objects.filter(status='in_maintenance').count()
-        disposed = Asset.objects.filter(status='disposed').count()
+        from django.db.models import Sum, Count, Q
         
-        # Total value
-        from django.db.models import Sum
-        total_value = Asset.objects.filter(status='active').aggregate(
-            total=Sum('purchase_price')
-        )['total'] or 0
-        
-        # Warranty status
-        under_warranty = Asset.objects.filter(
-            warranty_expiry__gte=date.today()
-        ).count()
-        warranty_expired = Asset.objects.filter(
-            warranty_expiry__lt=date.today()
-        ).count()
-        
-        # Maintenance due
-        maintenance_due = Asset.objects.filter(
-            next_maintenance_date__lte=date.today(),
-            status='active'
-        ).count()
+        # Optimize: Calculate all stats in a single database query using conditional aggregation
+        stats = Asset.objects.aggregate(
+            total=Count('pk'),
+            active=Count('pk', filter=Q(status='active')),
+            in_maintenance=Count('pk', filter=Q(status='in_maintenance')),
+            disposed=Count('pk', filter=Q(status='disposed')),
+            total_value=Sum('purchase_price', filter=Q(status='active')),
+            under_warranty=Count('pk', filter=Q(warranty_expiry__gte=date.today())),
+            warranty_expired=Count('pk', filter=Q(warranty_expiry__lt=date.today())),
+            maintenance_due=Count('pk', filter=Q(next_maintenance_date__lte=date.today(), status='active'))
+        )
         
         return Response({
-            'total': total,
-            'active': active,
-            'inMaintenance': in_maintenance,
-            'disposed': disposed,
-            'totalValue': total_value,
-            'underWarranty': under_warranty,
-            'warrantyExpired': warranty_expired,
-            'maintenanceDue': maintenance_due
+            'total': stats['total'],
+            'active': stats['active'],
+            'inMaintenance': stats['in_maintenance'],
+            'disposed': stats['disposed'],
+            'totalValue': stats['total_value'] or 0,
+            'underWarranty': stats['under_warranty'],
+            'warrantyExpired': stats['warranty_expired'],
+            'maintenanceDue': stats['maintenance_due']
         })
 
 
