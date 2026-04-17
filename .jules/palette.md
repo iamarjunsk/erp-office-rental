@@ -1,0 +1,1 @@
+## 2024-05-15 - Missing `aria-label` on Password Toggles | Learning: Password visibility toggle buttons in `login.vue` are missing `aria-label` attributes, which hurts accessibility. | Action: Add `aria-label="Toggle password visibility"` to these buttons.
