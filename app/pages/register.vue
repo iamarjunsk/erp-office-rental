@@ -45,10 +45,17 @@
                             <input v-model="form.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
                                 class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
-                            <button type="button" @click="showPassword = !showPassword" aria-label="Toggle password visibility"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
-                            </button>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <button type="button" @click="showPassword = !showPassword" :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                            <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{{ showPassword ? 'Hide password' : 'Show password' }}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
 
@@ -59,10 +66,17 @@
                             <input v-model="form.password_confirm" :type="showPasswordConfirm ? 'text' : 'password'" placeholder="••••••••"
                                 class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
-                            <button type="button" @click="showPasswordConfirm = !showPasswordConfirm" aria-label="Toggle password visibility"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPasswordConfirm ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
-                            </button>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger as-child>
+                                        <button type="button" @click="showPasswordConfirm = !showPasswordConfirm" :aria-label="showPasswordConfirm ? 'Hide password' : 'Show password'"
+                                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                                            <Icon :name="showPasswordConfirm ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
+                                        </button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>{{ showPasswordConfirm ? 'Hide password' : 'Show password' }}</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
 
@@ -91,6 +105,8 @@
 </template>
 
 <script setup lang="ts">
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '~/components/ui/tooltip'
+
 definePageMeta({
     layout: 'blank',
 })

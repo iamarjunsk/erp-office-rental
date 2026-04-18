@@ -1,0 +1,1 @@
+## 2026-04-18 - Missing Tooltips on Auth Passwords | Learning: Generic icon-only toggle buttons without dynamic tooltips provide poor feedback | Action: Wrap icon buttons in shadcn Tooltips and use dynamic aria-labels.
