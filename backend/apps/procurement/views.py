@@ -32,13 +32,14 @@ class VendorViewSet(viewsets.ModelViewSet):
         """Get vendor statistics"""
         queryset = self.get_queryset()
         
-        stats = {
-            'total': queryset.count(),
-            'active': queryset.filter(status='active').count(),
-            'inactive': queryset.filter(status='inactive').count(),
-            'suppliers': queryset.filter(vendor_type='supplier').count(),
-            'serviceProviders': queryset.filter(vendor_type='service_provider').count(),
-        }
+        # ⚡ Bolt: Combined multiple .count() queries into a single .aggregate() call to reduce database roundtrips
+        stats = queryset.aggregate(
+            total=Count('pk'),
+            active=Count('pk', filter=Q(status='active')),
+            inactive=Count('pk', filter=Q(status='inactive')),
+            suppliers=Count('pk', filter=Q(vendor_type='supplier')),
+            serviceProviders=Count('pk', filter=Q(vendor_type='service_provider'))
+        )
         
         return Response(stats)
 
@@ -93,14 +94,24 @@ class PurchaseRequisitionViewSet(viewsets.ModelViewSet):
         """Get requisition statistics"""
         queryset = self.get_queryset()
         
+        # ⚡ Bolt: Combined multiple .count() and .aggregate() queries into a single .aggregate() call
+        agg = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            pending_approval=Count('pk', filter=Q(status='pending_approval')),
+            approved=Count('pk', filter=Q(status='approved')),
+            rejected=Count('pk', filter=Q(status='rejected')),
+            converted_to_po=Count('pk', filter=Q(status='converted_to_po')),
+            totalValue=Sum('total_estimated_amount')
+        )
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'pending_approval': queryset.filter(status='pending_approval').count(),
-            'approved': queryset.filter(status='approved').count(),
-            'rejected': queryset.filter(status='rejected').count(),
-            'converted_to_po': queryset.filter(status='converted_to_po').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_estimated_amount'))['total'] or 0,
+            'total': agg['total'],
+            'draft': agg['draft'],
+            'pending_approval': agg['pending_approval'],
+            'approved': agg['approved'],
+            'rejected': agg['rejected'],
+            'converted_to_po': agg['converted_to_po'],
+            'totalValue': agg['totalValue'] or 0,
         }
         
         return Response(stats)
@@ -259,14 +270,24 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         """Get PO statistics"""
         queryset = self.get_queryset()
         
+        # ⚡ Bolt: Combined multiple .count() and .aggregate() queries into a single .aggregate() call
+        agg = queryset.aggregate(
+            total=Count('pk'),
+            draft=Count('pk', filter=Q(status='draft')),
+            sent=Count('pk', filter=Q(status='sent')),
+            acknowledged=Count('pk', filter=Q(status='acknowledged')),
+            partially_received=Count('pk', filter=Q(status='partially_received')),
+            received=Count('pk', filter=Q(status='received')),
+            totalValue=Sum('total_amount')
+        )
         stats = {
-            'total': queryset.count(),
-            'draft': queryset.filter(status='draft').count(),
-            'sent': queryset.filter(status='sent').count(),
-            'acknowledged': queryset.filter(status='acknowledged').count(),
-            'partially_received': queryset.filter(status='partially_received').count(),
-            'received': queryset.filter(status='received').count(),
-            'totalValue': queryset.aggregate(total=Sum('total_amount'))['total'] or 0,
+            'total': agg['total'],
+            'draft': agg['draft'],
+            'sent': agg['sent'],
+            'acknowledged': agg['acknowledged'],
+            'partially_received': agg['partially_received'],
+            'received': agg['received'],
+            'totalValue': agg['totalValue'] or 0,
         }
         
         return Response(stats)
