@@ -1,0 +1,1 @@
+## 2024-05-18 - Accessibility improvements to login form | Learning: Password toggle button lacks tooltip and label, inputs lack id/for links. | Action: Added aria-label, tooltip to password toggle button and linked labels to inputs.
