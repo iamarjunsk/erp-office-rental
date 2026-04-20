@@ -1,6 +1,6 @@
 <template>
   <ToastRoot
-    class="bg-white border rounded-md p-3 shadow-lg flex items-start gap-3 w-[360px] focus:outline-none"
+    class="toast-root bg-white border rounded-md p-3 shadow-lg flex items-start gap-3 w-[360px] focus:outline-none"
     :class="toastClasses"
     :open="toast.open"
     :duration="toast.duration"
