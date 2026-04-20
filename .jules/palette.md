@@ -1,0 +1,1 @@
+## 2024-05-22 - Login Feedback | Learning: Shared form state can be used to drive loading UI on specific buttons without extra refs. | Action: Use `isLoading && form.email === 'target'` pattern for quick login buttons.

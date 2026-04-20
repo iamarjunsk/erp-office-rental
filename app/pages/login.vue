@@ -43,6 +43,7 @@
                                 class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
                             <button type="button" @click="showPassword = !showPassword"
+                                aria-label="Toggle password visibility"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                                 <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
                             </button>
@@ -73,15 +74,17 @@
                 <!-- Demo Accounts -->
                 <div class="space-y-2">
                     <p class="text-sm text-muted-foreground text-center mb-3">Quick login for demo:</p>
-                    <button @click="loginAs('admin@officeerp.com', 'admin123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:shield" class="w-4 h-4" />
-                        Login as Admin
+                    <button @click="loginAs('admin@officeerp.com', 'admin123')" :disabled="isLoading"
+                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <Icon v-if="isLoading && form.email === 'admin@officeerp.com'" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                        <Icon v-else name="lucide:shield" class="w-4 h-4" />
+                        <span>{{ isLoading && form.email === 'admin@officeerp.com' ? 'Logging in...' : 'Login as Admin' }}</span>
                     </button>
-                    <button @click="loginAs('manager@officeerp.com', 'manager123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:user" class="w-4 h-4" />
-                        Login as Manager
+                    <button @click="loginAs('manager@officeerp.com', 'manager123')" :disabled="isLoading"
+                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <Icon v-if="isLoading && form.email === 'manager@officeerp.com'" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
+                        <Icon v-else name="lucide:user" class="w-4 h-4" />
+                        <span>{{ isLoading && form.email === 'manager@officeerp.com' ? 'Logging in...' : 'Login as Manager' }}</span>
                     </button>
                 </div>
 
