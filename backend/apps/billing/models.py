@@ -1,4 +1,6 @@
+from decimal import Decimal
 from django.db import models
+from django.db.models import Sum
 from apps.companies.models import Company
 from apps.leases.models import Lease
 
@@ -73,9 +75,9 @@ class Invoice(models.Model):
 
     def calculate_totals(self):
         """Calculate invoice totals from items"""
-        items = self.items.all()
-        self.subtotal = sum(item.line_total for item in items)
-        self.tax_amount = self.subtotal * (self.gst_rate / 100)
+        # Optimized: Use database aggregation instead of iterating in Python
+        self.subtotal = self.items.aggregate(total=Sum('line_total'))['total'] or 0
+        self.tax_amount = self.subtotal * (self.gst_rate / Decimal(100))
         self.total_amount = self.subtotal + self.tax_amount - self.discount_amount
         self.balance_due = self.total_amount - self.amount_paid
         self.save()
@@ -148,7 +150,9 @@ class Payment(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Update invoice balance
-        self.invoice.amount_paid = sum(p.amount for p in self.invoice.payments.filter(status='completed'))
+        # Optimized: Use database aggregation instead of iterating in Python
+        total_paid = self.invoice.payments.filter(status='completed').aggregate(total=Sum('amount'))['total'] or 0
+        self.invoice.amount_paid = total_paid
         self.invoice.balance_due = self.invoice.total_amount - self.invoice.amount_paid
         
         # Update invoice status
