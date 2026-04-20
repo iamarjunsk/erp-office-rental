@@ -1,3 +1,57 @@
+<script setup lang="ts">
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+
+definePageMeta({
+    layout: 'blank',
+})
+
+const { login, isLoading, error, isAuthenticated, isInitialized, initAuth } = useAuth()
+const isAuthChecking = ref(true)
+const loadingId = ref<string | null>(null) // For tracking which quick login button is loading
+
+const form = ref({
+    email: '',
+    password: '',
+})
+const showPassword = ref(false)
+
+// Check auth status on mount
+onMounted(async () => {
+    // Wait for auth initialization
+    if (!isInitialized.value) {
+        await initAuth()
+    }
+
+    // If already authenticated, redirect to admin
+    // But only if user didn't come from a protected page (avoiding redirect loops)
+    if (isAuthenticated.value) {
+        const redirectTo = useRoute().query.redirect as string
+        navigateTo(redirectTo || '/admin')
+    }
+
+    isAuthChecking.value = false
+})
+
+const handleLogin = async () => {
+    const result = await login(form.value)
+    if (result.success) {
+        navigateTo('/admin')
+    }
+}
+
+const loginAs = async (email: string, password: string, id: string) => {
+    loadingId.value = id
+    form.value = { email, password }
+    try {
+        await handleLogin()
+    } finally {
+        loadingId.value = null
+    }
+}
+</script>
+
 <template>
     <div
         class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -21,46 +75,65 @@
             <div v-else class="bg-card border border-border rounded-2xl p-8 shadow-2xl">
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
+                    <div class="grid gap-2">
+                        <Label for="email" :class="{ 'text-destructive': error }">Email</Label>
                         <div class="relative">
                             <Icon name="lucide:mail"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.email" type="email" placeholder="you@example.com"
-                                class="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
+                                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                            <Input
+                                id="email"
+                                v-model="form.email"
+                                type="email"
+                                placeholder="you@example.com"
+                                class="pl-9"
+                                :aria-invalid="!!error"
+                                required
+                            />
                         </div>
                     </div>
 
                     <!-- Password -->
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                    <div class="grid gap-2">
+                        <Label for="password" :class="{ 'text-destructive': error }">Password</Label>
                         <div class="relative">
                             <Icon name="lucide:lock"
-                                class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground z-10" />
+                            <Input
+                                id="password"
+                                v-model="form.password"
+                                :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••"
-                                class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                                required />
-                            <button type="button" @click="showPassword = !showPassword"
-                                class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
-                            </button>
+                                class="pl-9 pr-9"
+                                :aria-invalid="!!error"
+                                required
+                            />
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                class="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                                :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                @click="showPassword = !showPassword"
+                            >
+                                <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-4 h-4 text-muted-foreground" />
+                            </Button>
                         </div>
                     </div>
 
                     <!-- Error Message -->
                     <div v-if="error"
-                        class="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
+                        role="alert"
+                        aria-live="polite"
+                        class="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm flex items-center gap-2">
+                        <Icon name="lucide:alert-circle" class="w-4 h-4" />
                         {{ error }}
                     </div>
 
                     <!-- Submit Button -->
-                    <button type="submit" :disabled="isLoading"
-                        class="w-full py-3 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <Icon v-if="isLoading" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                        <span>{{ isLoading ? 'Signing in...' : 'Sign in' }}</span>
-                    </button>
+                    <Button type="submit" class="w-full" :disabled="isLoading || !!loadingId">
+                        <Icon v-if="isLoading && !loadingId" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+                        {{ isLoading && !loadingId ? 'Signing in...' : 'Sign in' }}
+                    </Button>
                 </form>
 
                 <!-- Divider -->
@@ -73,22 +146,32 @@
                 <!-- Demo Accounts -->
                 <div class="space-y-2">
                     <p class="text-sm text-muted-foreground text-center mb-3">Quick login for demo:</p>
-                    <button @click="loginAs('admin@officeerp.com', 'admin123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:shield" class="w-4 h-4" />
+                    <Button
+                        variant="outline"
+                        class="w-full justify-start"
+                        @click="loginAs('admin@officeerp.com', 'admin123', 'admin')"
+                        :disabled="isLoading || !!loadingId"
+                    >
+                        <Icon v-if="loadingId === 'admin'" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+                        <Icon v-else name="lucide:shield" class="w-4 h-4 mr-2" />
                         Login as Admin
-                    </button>
-                    <button @click="loginAs('manager@officeerp.com', 'manager123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
-                        <Icon name="lucide:user" class="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="outline"
+                        class="w-full justify-start"
+                        @click="loginAs('manager@officeerp.com', 'manager123', 'manager')"
+                        :disabled="isLoading || !!loadingId"
+                    >
+                        <Icon v-if="loadingId === 'manager'" name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" />
+                        <Icon v-else name="lucide:user" class="w-4 h-4 mr-2" />
                         Login as Manager
-                    </button>
+                    </Button>
                 </div>
 
                 <!-- Register Link -->
                 <p class="text-center mt-6 text-sm text-muted-foreground">
                     Don't have an account?
-                    <NuxtLink to="/register" class="text-primary hover:underline">Sign up</NuxtLink>
+                    <NuxtLink to="/register" class="text-primary hover:underline font-medium">Sign up</NuxtLink>
                 </p>
             </div>
 
@@ -99,47 +182,3 @@
         </div>
     </div>
 </template>
-
-<script setup lang="ts">
-definePageMeta({
-    layout: 'blank',
-})
-
-const { login, isLoading, error, isAuthenticated, isInitialized, initAuth } = useAuth()
-const isAuthChecking = ref(true)
-
-const form = ref({
-    email: '',
-    password: '',
-})
-const showPassword = ref(false)
-
-// Check auth status on mount
-onMounted(async () => {
-    // Wait for auth initialization
-    if (!isInitialized.value) {
-        await initAuth()
-    }
-    
-    // If already authenticated, redirect to admin
-    // But only if user didn't come from a protected page (avoiding redirect loops)
-    if (isAuthenticated.value) {
-        const redirectTo = useRoute().query.redirect as string
-        navigateTo(redirectTo || '/admin')
-    }
-    
-    isAuthChecking.value = false
-})
-
-const handleLogin = async () => {
-    const result = await login(form.value)
-    if (result.success) {
-        navigateTo('/admin')
-    }
-}
-
-const loginAs = async (email: string, password: string) => {
-    form.value = { email, password }
-    await handleLogin()
-}
-</script>
