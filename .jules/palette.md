@@ -1,0 +1,1 @@
+## 2024-04-21 - Form Accessibility | Learning: Form inputs lacked id and label associations, degrading accessibility. | Action: Added explicit id to inputs and for attributes to their corresponding labels.
