@@ -1,0 +1,1 @@
+## 2024-04-22 - Missing Form Accessibility on Login | Learning: The login form inputs are missing `id` and `for` associations, and the password toggle lacks an `aria-label`, making them inaccessible to screen readers. | Action: Add `id` and `for` attributes to explicitly link labels with inputs, and add `aria-label` to icon-only buttons.
