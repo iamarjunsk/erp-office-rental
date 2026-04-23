@@ -1,0 +1,1 @@
+## 2026-04-23 - Form Input Accessibility | Learning: Form inputs in login/register were missing explicit IDs and label links | Action: Always add id to inputs and matching for attribute to labels to ensure screen reader support and better hit areas.
