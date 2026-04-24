@@ -1,0 +1,1 @@
+## 2026-04-24 - Login Form Accessibility | Learning: Icon-only buttons without aria-labels and inputs without explicit label linkage hurt accessibility. | Action: Ensure all form inputs have IDs linked to labels via 'for' attributes, and icon-only buttons have aria-labels.
