@@ -150,29 +150,30 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get maintenance statistics"""
-        total = MaintenanceRequest.objects.count()
-        open_count = MaintenanceRequest.objects.filter(status='open').count()
-        in_progress = MaintenanceRequest.objects.filter(status='in_progress').count()
-        completed = MaintenanceRequest.objects.filter(status='completed').count()
+        from django.db.models import Count, Q
         
-        # Priority breakdown
-        urgent = MaintenanceRequest.objects.filter(priority='urgent', status__in=['open', 'assigned', 'in_progress']).count()
-        high = MaintenanceRequest.objects.filter(priority='high', status__in=['open', 'assigned', 'in_progress']).count()
+        now_date = timezone.now().date()
+        active_statuses = ['open', 'assigned', 'in_progress']
         
-        # Overdue count
-        overdue = MaintenanceRequest.objects.filter(
-            scheduled_date__lt=timezone.now().date(),
-            status__in=['open', 'assigned', 'in_progress']
-        ).count()
+        # Combine multiple queries into a single database hit using aggregation
+        stats = MaintenanceRequest.objects.aggregate(
+            total=Count('pk'),
+            open=Count('pk', filter=Q(status='open')),
+            inProgress=Count('pk', filter=Q(status='in_progress')),
+            completed=Count('pk', filter=Q(status='completed')),
+            urgent=Count('pk', filter=Q(priority='urgent', status__in=active_statuses)),
+            highPriority=Count('pk', filter=Q(priority='high', status__in=active_statuses)),
+            overdue=Count('pk', filter=Q(scheduled_date__lt=now_date, status__in=active_statuses))
+        )
         
         return Response({
-            'total': total,
-            'open': open_count,
-            'inProgress': in_progress,
-            'completed': completed,
-            'urgent': urgent,
-            'highPriority': high,
-            'overdue': overdue
+            'total': stats['total'] or 0,
+            'open': stats['open'] or 0,
+            'inProgress': stats['inProgress'] or 0,
+            'completed': stats['completed'] or 0,
+            'urgent': stats['urgent'] or 0,
+            'highPriority': stats['highPriority'] or 0,
+            'overdue': stats['overdue'] or 0
         })
 
 
