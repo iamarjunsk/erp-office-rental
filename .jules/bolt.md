@@ -1,0 +1,3 @@
+## 2024-04-25 - Combined ORM Conditional Aggregations in Maintenance stats
+**Learning:** Returning multiple counts with differing conditions using `.filter(condition).count()` on a Django viewset triggers an individual database query for every check (e.g. 7 queries for 7 stats). Combining these via `aggregate(Count('pk', filter=Q(condition)))` executes them in a single database roundtrip, massively improving performance.
+**Action:** When extracting multiple statistical counts from a single model based on status or date ranges, combine them using `.aggregate()` with `Count` and `Q` objects instead of chaining individual `.count()` filters.
