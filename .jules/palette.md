@@ -1,0 +1,1 @@
+## 2026-04-25 - Auth Forms Accessibility Gap | Learning: Inputs lack id attributes mapped to label for attributes, harming screen reader support. | Action: Add explicit id and for pairs to auth forms.
