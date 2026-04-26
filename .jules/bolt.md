@@ -1,0 +1,1 @@
+## 2024-05-18 - Combine ORM aggregations **Learning:** Combining multiple `.count()` queries into a single `.aggregate()` query with `Count("id", filter=Q(...))` reduces database roundtrips. **Action:** Always combine related aggregates for statistical views.
