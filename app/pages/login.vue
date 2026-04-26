@@ -22,11 +22,11 @@
                 <form @submit.prevent="handleLogin" class="space-y-5">
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
+                        <label for="email" class="block text-sm font-medium mb-2">Email</label>
                         <div class="relative">
                             <Icon name="lucide:mail"
                                 class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.email" type="email" placeholder="you@example.com"
+                            <input id="email" v-model="form.email" type="email" placeholder="you@example.com"
                                 class="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
                         </div>
@@ -34,15 +34,16 @@
 
                     <!-- Password -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <label for="password" class="block text-sm font-medium mb-2">Password</label>
                         <div class="relative">
                             <Icon name="lucide:lock"
                                 class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'"
+                            <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'"
                                 placeholder="••••••••"
                                 class="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                 required />
                             <button type="button" @click="showPassword = !showPassword"
+                                aria-label="Toggle password visibility"
                                 class="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                                 <Icon :name="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="w-5 h-5" />
                             </button>
@@ -74,12 +75,14 @@
                 <div class="space-y-2">
                     <p class="text-sm text-muted-foreground text-center mb-3">Quick login for demo:</p>
                     <button @click="loginAs('admin@officeerp.com', 'admin123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
+                        :disabled="isLoading"
+                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <Icon name="lucide:shield" class="w-4 h-4" />
                         Login as Admin
                     </button>
                     <button @click="loginAs('manager@officeerp.com', 'manager123')"
-                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2">
+                        :disabled="isLoading"
+                        class="w-full py-2.5 border border-border rounded-lg hover:bg-muted transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                         <Icon name="lucide:user" class="w-4 h-4" />
                         Login as Manager
                     </button>
