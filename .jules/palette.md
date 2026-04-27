@@ -1,0 +1,1 @@
+## 2024-04-28 - Replace Native Alerts with Toast | Learning: The codebase uses native `alert()` for displaying errors extensively, which is a poor UX pattern and disrupts the flow. | Action: Replaced native `alert()` calls with the shadcn `useToast()` hook.
