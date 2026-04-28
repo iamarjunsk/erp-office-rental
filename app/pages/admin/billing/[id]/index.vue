@@ -332,6 +332,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -416,7 +417,7 @@ const submitPayment = async () => {
       status: 'completed'
     }
   } catch (e: any) {
-    alert('Failed to record payment: ' + (e.data?.detail || 'Unknown error'))
+    toast({ title: 'Error', description: String('Failed to record payment: ' + (e.data?.detail || 'Unknown error')), variant: 'destructive' })
   } finally {
     submittingPayment.value = false
   }
@@ -444,7 +445,7 @@ const downloadInvoice = async () => {
     document.body.removeChild(link)
     window.URL.revokeObjectURL(url)
   } catch (e: any) {
-    alert('Failed to download invoice: ' + (e.message || 'Unknown error'))
+    toast({ title: 'Error', description: String('Failed to download invoice: ' + (e.message || 'Unknown error')), variant: 'destructive' })
   } finally {
     downloading.value = false
   }
