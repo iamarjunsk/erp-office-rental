@@ -204,6 +204,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 const API_BASE = 'http://localhost:8000/api/users'
 
 definePageMeta({
@@ -276,7 +277,7 @@ const addUser = async () => {
     newUser.value = { first_name: '', last_name: '', email: '', role: 'staff', department: '', password: '', password_confirm: '' }
     await refresh()
   } catch (e: any) {
-    alert(e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user')
+    toast({ title: 'Error', description: String(e.data?.email?.[0] || e.data?.password?.[0] || 'Failed to add user'), variant: 'destructive' })
   } finally {
     isSubmitting.value = false
   }

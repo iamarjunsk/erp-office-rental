@@ -189,6 +189,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -236,9 +237,9 @@ const updateLease = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to update lease:\n${errors}`)
+      toast({ title: 'Error', description: String(`Failed to update lease:\n${errors}`), variant: 'destructive' })
     } else {
-      alert('Failed to update lease')
+      toast({ title: 'Error', description: String('Failed to update lease'), variant: 'destructive' })
     }
   } finally {
     saving.value = false

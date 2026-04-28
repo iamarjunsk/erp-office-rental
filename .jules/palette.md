@@ -1,0 +1,1 @@
+## 2026-04-28 - Replace Native Alerts with Toast | Learning: Using native alert() breaks UX and app styling. | Action: Use shadcn-vue's useToast composable and replace native alert() calls across the app to improve error handling feedback.

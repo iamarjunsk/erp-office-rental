@@ -273,6 +273,7 @@
 </template>
 
 <script setup lang="ts">
+const { toast } = useToast()
 definePageMeta({
   layout: 'admin',
   middleware: ['auth'],
@@ -382,9 +383,9 @@ const createInvoice = async () => {
       const errors = Object.entries(e.data)
         .map(([key, msgs]) => `${key}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
         .join('\n')
-      alert(`Failed to create invoice:\n${errors}`)
+      toast({ title: 'Error', description: String(`Failed to create invoice:\n${errors}`), variant: 'destructive' })
     } else {
-      alert('Failed to create invoice')
+      toast({ title: 'Error', description: String('Failed to create invoice'), variant: 'destructive' })
     }
   } finally {
     creating.value = false
