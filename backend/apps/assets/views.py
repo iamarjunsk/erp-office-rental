@@ -161,41 +161,24 @@ class AssetViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get asset statistics"""
-        total = Asset.objects.count()
-        active = Asset.objects.filter(status='active').count()
-        in_maintenance = Asset.objects.filter(status='in_maintenance').count()
-        disposed = Asset.objects.filter(status='disposed').count()
+        from django.db.models import Count, Sum, Q
         
-        # Total value
-        from django.db.models import Sum
-        total_value = Asset.objects.filter(status='active').aggregate(
-            total=Sum('purchase_price')
-        )['total'] or 0
+        today = date.today()
         
-        # Warranty status
-        under_warranty = Asset.objects.filter(
-            warranty_expiry__gte=date.today()
-        ).count()
-        warranty_expired = Asset.objects.filter(
-            warranty_expiry__lt=date.today()
-        ).count()
+        stats = Asset.objects.aggregate(
+            total=Count('id'),
+            active=Count('id', filter=Q(status='active')),
+            inMaintenance=Count('id', filter=Q(status='in_maintenance')),
+            disposed=Count('id', filter=Q(status='disposed')),
+            totalValue=Sum('purchase_price', filter=Q(status='active')),
+            underWarranty=Count('id', filter=Q(warranty_expiry__gte=today)),
+            warrantyExpired=Count('id', filter=Q(warranty_expiry__lt=today)),
+            maintenanceDue=Count('id', filter=Q(next_maintenance_date__lte=today, status='active'))
+        )
         
-        # Maintenance due
-        maintenance_due = Asset.objects.filter(
-            next_maintenance_date__lte=date.today(),
-            status='active'
-        ).count()
+        stats['totalValue'] = stats['totalValue'] or 0
         
-        return Response({
-            'total': total,
-            'active': active,
-            'inMaintenance': in_maintenance,
-            'disposed': disposed,
-            'totalValue': total_value,
-            'underWarranty': under_warranty,
-            'warrantyExpired': warranty_expired,
-            'maintenanceDue': maintenance_due
-        })
+        return Response(stats)
 
 
 class AssetMaintenanceViewSet(viewsets.ModelViewSet):
