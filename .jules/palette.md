@@ -1,0 +1,1 @@
+## 2024-05-18 - Replace native alert and add loading state in Users list | Learning: Users experienced jarring native alerts and lacked visual feedback when creating a new user, leading to a poor experience. | Action: Replaced `alert` with shadcn's `useToast` for graceful notifications and added a disabled/loading spinner state to the submit button to prevent double submissions.
