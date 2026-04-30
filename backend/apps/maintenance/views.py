@@ -150,30 +150,23 @@ class MaintenanceRequestViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get maintenance statistics"""
-        total = MaintenanceRequest.objects.count()
-        open_count = MaintenanceRequest.objects.filter(status='open').count()
-        in_progress = MaintenanceRequest.objects.filter(status='in_progress').count()
-        completed = MaintenanceRequest.objects.filter(status='completed').count()
+        from django.db.models import Count, Q
         
-        # Priority breakdown
-        urgent = MaintenanceRequest.objects.filter(priority='urgent', status__in=['open', 'assigned', 'in_progress']).count()
-        high = MaintenanceRequest.objects.filter(priority='high', status__in=['open', 'assigned', 'in_progress']).count()
+        active_statuses = ['open', 'assigned', 'in_progress']
+        now_date = timezone.now().date()
         
-        # Overdue count
-        overdue = MaintenanceRequest.objects.filter(
-            scheduled_date__lt=timezone.now().date(),
-            status__in=['open', 'assigned', 'in_progress']
-        ).count()
+        # ⚡ Bolt: Combined 7 count queries into a single aggregate query
+        stats = MaintenanceRequest.objects.aggregate(
+            total=Count('id'),
+            open=Count('id', filter=Q(status='open')),
+            inProgress=Count('id', filter=Q(status='in_progress')),
+            completed=Count('id', filter=Q(status='completed')),
+            urgent=Count('id', filter=Q(priority='urgent', status__in=active_statuses)),
+            highPriority=Count('id', filter=Q(priority='high', status__in=active_statuses)),
+            overdue=Count('id', filter=Q(scheduled_date__lt=now_date, status__in=active_statuses))
+        )
         
-        return Response({
-            'total': total,
-            'open': open_count,
-            'inProgress': in_progress,
-            'completed': completed,
-            'urgent': urgent,
-            'highPriority': high,
-            'overdue': overdue
-        })
+        return Response(stats)
 
 
 class MaintenanceTaskViewSet(viewsets.ModelViewSet):
