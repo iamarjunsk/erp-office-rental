@@ -1,0 +1,1 @@
+## 2024-05-01 - Fix Form Accessibility | Learning: Missing `for` and `id` attributes on form inputs and labels make it difficult for screen readers to associate them. Icon-only buttons without `aria-label` are inaccessible. | Action: Added explicit label associations and `aria-label`s to toggle password buttons on login and register pages.

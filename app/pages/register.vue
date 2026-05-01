@@ -17,14 +17,14 @@
                     <!-- Name Fields -->
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium mb-2">First Name</label>
-                            <input v-model="form.first_name" type="text" placeholder="John"
+                               <label for="first_name" class="block text-sm font-medium mb-2">First Name</label>
+                               <input id="first_name" v-model="form.first_name" type="text" placeholder="John"
                                 class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-2">Last Name</label>
-                            <input v-model="form.last_name" type="text" placeholder="Doe"
+                               <label for="last_name" class="block text-sm font-medium mb-2">Last Name</label>
+                               <input id="last_name" v-model="form.last_name" type="text" placeholder="Doe"
                                 class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
                         </div>
@@ -32,17 +32,17 @@
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Email</label>
-                        <input v-model="form.email" type="email" placeholder="you@example.com"
+                        <label for="email" class="block text-sm font-medium mb-2">Email</label>
+                        <input id="email" v-model="form.email" type="email" placeholder="you@example.com"
                             class="w-full px-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                             required />
                     </div>
 
                     <!-- Password -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Password</label>
+                        <label for="password" class="block text-sm font-medium mb-2">Password</label>
                         <div class="relative">
-                            <input v-model="form.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
+                            <input id="password" v-model="form.password" :type="showPassword ? 'text' : 'password'" placeholder="••••••••"
                                 class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
                             <button type="button" @click="showPassword = !showPassword" aria-label="Toggle password visibility"
@@ -54,9 +54,9 @@
 
                     <!-- Confirm Password -->
                     <div>
-                        <label class="block text-sm font-medium mb-2">Confirm Password</label>
+                        <label for="password_confirm" class="block text-sm font-medium mb-2">Confirm Password</label>
                         <div class="relative">
-                            <input v-model="form.password_confirm" :type="showPasswordConfirm ? 'text' : 'password'" placeholder="••••••••"
+                            <input id="password_confirm" v-model="form.password_confirm" :type="showPasswordConfirm ? 'text' : 'password'" placeholder="••••••••"
                                 class="w-full pl-4 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent"
                                 required />
                             <button type="button" @click="showPasswordConfirm = !showPasswordConfirm" aria-label="Toggle password visibility"
