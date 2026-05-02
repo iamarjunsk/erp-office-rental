@@ -161,40 +161,32 @@ class AssetViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def stats(self, request):
         """Get asset statistics"""
-        total = Asset.objects.count()
-        active = Asset.objects.filter(status='active').count()
-        in_maintenance = Asset.objects.filter(status='in_maintenance').count()
-        disposed = Asset.objects.filter(status='disposed').count()
+        # Bolt Optimization: Replaced 8 individual count/aggregate queries
+        # with a single conditional aggregate query to fix N+1 style query explosion
+        from django.db.models import Sum, Count, Q
         
-        # Total value
-        from django.db.models import Sum
-        total_value = Asset.objects.filter(status='active').aggregate(
-            total=Sum('purchase_price')
-        )['total'] or 0
+        today = date.today()
         
-        # Warranty status
-        under_warranty = Asset.objects.filter(
-            warranty_expiry__gte=date.today()
-        ).count()
-        warranty_expired = Asset.objects.filter(
-            warranty_expiry__lt=date.today()
-        ).count()
-        
-        # Maintenance due
-        maintenance_due = Asset.objects.filter(
-            next_maintenance_date__lte=date.today(),
-            status='active'
-        ).count()
+        stats_data = Asset.objects.aggregate(
+            total=Count('id'),
+            active=Count('id', filter=Q(status='active')),
+            in_maintenance=Count('id', filter=Q(status='in_maintenance')),
+            disposed=Count('id', filter=Q(status='disposed')),
+            total_value=Sum('purchase_price', filter=Q(status='active')),
+            under_warranty=Count('id', filter=Q(warranty_expiry__gte=today)),
+            warranty_expired=Count('id', filter=Q(warranty_expiry__lt=today)),
+            maintenance_due=Count('id', filter=Q(next_maintenance_date__lte=today, status='active'))
+        )
         
         return Response({
-            'total': total,
-            'active': active,
-            'inMaintenance': in_maintenance,
-            'disposed': disposed,
-            'totalValue': total_value,
-            'underWarranty': under_warranty,
-            'warrantyExpired': warranty_expired,
-            'maintenanceDue': maintenance_due
+            'total': stats_data['total'] or 0,
+            'active': stats_data['active'] or 0,
+            'inMaintenance': stats_data['in_maintenance'] or 0,
+            'disposed': stats_data['disposed'] or 0,
+            'totalValue': stats_data['total_value'] or 0,
+            'underWarranty': stats_data['under_warranty'] or 0,
+            'warrantyExpired': stats_data['warranty_expired'] or 0,
+            'maintenanceDue': stats_data['maintenance_due'] or 0
         })
 
 
