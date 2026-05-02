@@ -1,0 +1,1 @@
+## 2024-11-20 - Fix form accessibility | Learning: Form inputs in login and register pages lack `id` and `for` attributes, leading to poor accessibility and screen reader support. | Action: Added `id` to all inputs and `for` to corresponding labels, and added `aria-label` to the password visibility toggle in login.vue.
