@@ -1,0 +1,1 @@
+## 2024-10-24 - Missing Form Label Associations and Aria Labels | Learning: Users relying on screen readers or clicking labels to focus inputs were unable to interact properly due to missing `id` and `for` attributes in auth forms. Password toggles lacked `aria-label` attributes. | Action: Added explicit `id` and `for` linkings and aria-labels to ensure robust accessibility.
