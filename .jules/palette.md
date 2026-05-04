@@ -1,0 +1,1 @@
+## 2024-05-18 - Form Labels and IDs | Learning: Form inputs in login and register lacked associated labels and IDs, causing accessibility issues. | Action: Added `id` to all inputs and `for` to corresponding labels, and added `aria-label` to password toggles.
