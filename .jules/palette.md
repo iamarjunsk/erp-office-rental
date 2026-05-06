@@ -1,0 +1,1 @@
+## 2024-05-06 - Login Form Accessibility | Learning: Icon-only buttons lacking aria-labels and disconnected form labels degrade screen-reader experience. | Action: Added explicit id/for mapping to inputs and an aria-label to the password visibility toggle.
